@@ -1,0 +1,9 @@
+.container
+  .row
+    .col-xs-offset-2.col-xs-8
+      - [:notice, :alert, :error, :info].each do |name|
+        - if flash[name].present?
+          #notice.alert.alert-dismissible class = flash_class(name) role = alert
+            button.close *{data: {dismiss: 'alert'}, aria: {label: 'Close'} }
+              span *{aria: {hidden: true}} = fa_icon 'times'
+            = flash[name].html_safe

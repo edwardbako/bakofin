@@ -1,0 +1,23 @@
+nav.navbar.navbar-default.navbar-fixed-top
+  .container
+    .navbar-header
+      button(type='button' class='navbar-toggle collapsed' data-toggle='collapse'
+              data-target='#main-navbar' aria-expanded='false' )
+        = fa_icon 'bars'
+      = link_to root_path, class: 'navbar-brand' do
+        ' Bakofin
+
+    #main-navbar.collapse.navbar-collapse
+      ul.nav.navbar-nav
+        li.disabled = link_to 'Commodities'
+
+      ul.nav.navbar-nav.navbar-right
+        p.navbar-text
+          ' Bla-bla
+        /- if user_signed_in?
+        /  p.navbar-text
+        /    small= current_user.first_name
+        /  li = link_to fa_icon('sign-out', text: 'Выйти', right: true),
+        /               destroy_user_session_path, method: :delete
+        /- else
+        /  li = link_to fa_icon('sign-in', text: 'Войти', right: true), new_user_session_path

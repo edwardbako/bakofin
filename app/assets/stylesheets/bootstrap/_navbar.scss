@@ -1,0 +1,19 @@
+.navbar {
+  //font-weight: bold;
+
+  .navbar-brand {
+    font-family: 'Gochi Hand', cursive;
+    font-size: 2.5em;
+    color: lighten($brand-primary, 15%) !important;
+
+    &:hover {
+      color: $brand-primary !important;
+    }
+  }
+
+  .navbar-header {
+    .fa {
+      color: #fff;
+    }
+  }
+}

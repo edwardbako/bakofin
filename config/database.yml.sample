@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see rails configuration guide
+  # http://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: localhost
+
+  username: user
+  password: password
+
+development:
+  <<: *default
+  database: bakofin_development
+
+test:
+  <<: *default
+  database: bakofin_test
+
+#production:
+#  <<: *default
+#  database: bakofin_production
+#  username: login
+#  password: <%= ENV['BOOKKEEPER_DATABASE_PASSWORD'] %>
