@@ -23,3 +23,5 @@
 #= require cable
 
 #= require bootstrap.min
+
+#= require highstock.js
