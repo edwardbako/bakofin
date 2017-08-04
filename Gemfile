@@ -38,7 +38,8 @@ gem 'jbuilder', '~> 2.5' # Build JSON APIs with ease. Read more: https://github.
 
 # gem 'trix' # Trix WYSIWYG editor
 
-# gem 'redis', '~> 3.0' # Use Redis adapter to run Action Cable in production
+gem 'redis'
+gem 'hiredis'
 gem 'sidekiq' # Queueing framework
 gem 'sidekiq-cron' # Cron jobs for queueing
 gem 'sinatra', :require => nil
@@ -80,6 +81,8 @@ group :development do
   gem 'capistrano-bundler'
   gem 'capistrano-sidekiq'
   gem 'capistrano3-puma', require: false
+
+  gem 'memory_profiler'
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

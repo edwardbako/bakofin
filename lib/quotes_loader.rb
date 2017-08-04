@@ -5,13 +5,13 @@ class QuotesLoader
   class StandardError < StandardError; end
 
   SUPPORTED_EXTENSIONS = ['csv']
-  PATH = File.join(Rails.root,'data')
+  PATH = Rails.root.join 'data'
   FILES = %w(XAUUSD1.csv XAUUSD5.csv XAUUSD15.csv XAUUSD30.csv XAUUSD60.csv
              XAUUSD240.csv XAUUSD1440.csv)
 
   attr_accessor :path, :filename, :symbol, :timeframe
 
-  def initialize(path, filename)
+  def initialize(path: PATH, filename: nil)
     @path = path
     @filename = filename
   end
