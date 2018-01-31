@@ -9,7 +9,7 @@ set :repo_url, 'git@github.com:edwardbako/bakofin.git'
 set :deploy_to, '/home/deploy/www/bakofin'
 
 set :puma_threads, [2, 16]
-set :puma_workers, 0
+set :puma_workers, 1
 
 append :linked_files, 'config/database.yml', 'config/secrets.yml', 'config/cable.yml',
        'config/redis.yml', 'config/schedule.yml', 'public/robots.txt'
