@@ -1,4 +1,5 @@
 class Quote < ApplicationRecord
+  ActiveModel::Model
   belongs_to :symb
 
   scope :m1, -> { where(timeframe: 1) }
