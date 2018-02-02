@@ -5,7 +5,6 @@ class TicksController < ApplicationController
   before_action :verify_request_ip
 
   def index
-    puts request.body
     respond_to do |format|
       format.json {render json: {action: :buy}, status: :ok}
     end
@@ -31,7 +30,6 @@ class TicksController < ApplicationController
     params.permit(:bid, :ask, :symbol, :timeframe, :volume)
   end
 
-  # TODO: implement metatrader IP address verification
   def verify_request_ip
     unless Rails.application.secrets[:ip_whitelist].include? request.remote_ip
       render plain: 'Not Authorized', status: :unauthorized

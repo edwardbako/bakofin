@@ -51,7 +51,7 @@ Rails.application.configure do
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
-  config.log_level = :debug
+  config.log_level = :warn
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
@@ -63,6 +63,15 @@ Rails.application.configure do
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "bakofin_#{Rails.env}"
   config.action_mailer.perform_caching = false
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:              'smtp.gmail.com',
+    port:                 587,
+    domain:               'bakofin.ru',
+    user_name:            Rails.application.secrets.gmail[:username],
+    password:             Rails.application.secrets.gmail[:password],
+    authentication:       'plain',
+    enable_starttls_auto: true  }
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
@@ -90,4 +99,25 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  # Use exceptions Notification to handle errors
+  config.middleware.use ExceptionNotification::Rack,
+    email: {
+      deliver_with: :deliver,
+      email_prefix: "[Bakofin - #{Rails.env}] ",
+      sender_address: 'noreply@bakofin.ru',
+      exception_recipients: 'edward.bako@gmail.com'
+    },
+    # ignore_exceptions: [] + ExceptionNotifier.ignored_exceptions,
+    error_grouping: true,
+    error_grouping_period: 15.minutes    # the time before an error is regarded as fixed
+  # error_grouping_cache: Rails.cache,   # for other applications such as Sinatra, use one instance of ActiveSupport::Cache::Store
+
+  # notification_trigger: specify a callback to determine when a notification should be sent,
+  #   the callback will be invoked with two arguments:
+  #     exception: the exception raised
+  #     count: accumulated errors count for this exception
+
+  # notification_trigger: lambda { |exception, count| count % 10 == 0 }
+
 end

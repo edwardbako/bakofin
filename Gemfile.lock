@@ -123,6 +123,9 @@ GEM
     erubi (1.6.1)
     et-orbi (1.0.5)
       tzinfo
+    exception_notification (4.2.2)
+      actionmailer (>= 4.0, < 6)
+      activesupport (>= 4.0, < 6)
     execjs (2.7.0)
     factory_girl (4.8.0)
       activesupport (>= 3.0.0)
@@ -358,6 +361,7 @@ DEPENDENCIES
   colorize
   cucumber-rails
   devise
+  exception_notification
   factory_girl_rails
   font-awesome-rails
   hiredis
