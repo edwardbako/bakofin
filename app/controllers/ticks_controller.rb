@@ -21,13 +21,17 @@ class TicksController < ApplicationController
   private
 
   def log_data
-    [:bid, :ask, :symbol, :timeframe, :volume].each do |param|
+    alowed_params.each do |param|
       logger.warn "#{param.upcase}: #{tick_params[param]}"
     end
   end
 
+  def alowed_params
+    [:bid, :ask, :symbol, :timeframe, :time, :volume]
+  end
+
   def tick_params
-    params.permit(:bid, :ask, :symbol, :timeframe, :volume)
+    params.permit(alowed_params)
   end
 
   def verify_request_ip
