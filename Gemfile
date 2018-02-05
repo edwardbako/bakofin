@@ -40,6 +40,7 @@ gem 'jbuilder', '~> 2.5' # Build JSON APIs with ease. Read more: https://github.
 
 gem 'redis'
 gem 'hiredis'
+gem 'redis-objects', github: "edwardbako/redis-objects", branch: "map_option" # Map Redis types directly to Ruby objects
 gem 'sidekiq' # Queueing framework
 gem 'sidekiq-cron' # Cron jobs for queueing
 gem 'sinatra', :require => nil
