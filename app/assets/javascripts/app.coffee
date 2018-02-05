@@ -1,5 +1,6 @@
 @App =
   name: 'Bakofin'
+  myChart: undefined
 
   init: ()->
     console.info "#{@name} initialized"
@@ -11,10 +12,10 @@
       quotes = $.parseJSON result.quotes
       volumes = $.parseJSON result.volumes
 
-      myChart = Highcharts.stockChart('chart', {
+      App.myChart = Highcharts.stockChart('chart', {
         title: {
           useHTML: true,
-          text: "XAUUSD H1"
+          text: "XAUUSD M1"
         },
         tooltip: {
           split: true
@@ -26,7 +27,7 @@
           tickInterval: 60
         },
         yAxis: [{
-          type: 'logarithmic',
+          type: 'linear', #'logarithmic'
           labels: {
             align: 'right',
             x: -3
@@ -55,16 +56,46 @@
             name: 'XAUUSD',
             type: "candlestick",
             data: quotes,
-            animation: false
+            animation: {duration: 0}
           },
           {
             name: 'Volume',
             type: 'column',
             data: volumes,
             yAxis: 1,
-            animation: false
+            animation: {duration: 0}
           }
         ],
+        chart: {
+          animation: {duration: 100, easing: "swing"},
+          events: {
+            load: ()->
+              setInterval((()=>
+                q = @.series[0]
+                v = @.series[1]
+                l = q.points.length
+                $.getJSON('/quotes/0', (result)=>
+                  point = {
+                    quotes: $.parseJSON result.quotes
+                    volumes: $.parseJSON result.volumes
+                  }
+                  last = {
+                    quotes: q.points[l-1]
+                    volumes: v.points[l-1]
+                  }
+                  if last.quotes.x != point.quotes.x
+                    q.addPoint(point.quotes)
+                    v.addPoint(point.volumes)
+                  else
+                    last.quotes.update(point.quotes)
+                    last.volumes.update(point.volumes)
+
+#                  console.log l
+#                  console.log last.quotes.x == point.quotes.x
+                )
+              ), 1000)
+          }
+        },
         rangeSelector: {
           allButtonsEnabled: true,
           buttons: [
@@ -96,6 +127,12 @@
           selected: 1
         },
         plotOptions: {
+          column: {
+            animation: {duration: 0}
+          },
+          candlestick: {
+            animation: {duration: 0}
+          },
           series: {
             dataGrouping: {
               enabled: false

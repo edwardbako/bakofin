@@ -23,14 +23,31 @@ class Series
   end
 
   def at(index)
-    {
-      time: time[index],
-      open: open[index],
-      high: high[index],
-      low: low[index],
-      close: close[index],
-      volume: volume[index]
-    }
+    if index.is_a? Integer
+      result = {
+        time: time[index],
+        x: time[index].to_i * 1000,
+        open: open[index],
+        high: high[index],
+        low: low[index],
+        close: close[index],
+        volume: volume[index],
+        y: volume[index]
+      }
+    else
+      result = time[index].reverse.map { |v| {time: v} }
+      x = time[index].reverse.map { |v| {x: v.to_i * 1000} }
+      o = open[index].reverse.map { |v| {open: v} }
+      h = high[index].reverse.map { |v| {high: v} }
+      l = low[index].reverse.map { |v| {low: v} }
+      c = close[index].reverse.map { |v| {close: v} }
+      v = volume[index].reverse.map { |v| {volume: v} }
+      y = volume[index].reverse.map { |v| {y: v} }
+      result.each_with_index do |q, i|
+        q.merge!(o[i]).merge!(h[i]).merge!(l[i]).merge!(c[i]).merge!(v[i]).merge!(x[i]).merge!(y[i])
+      end
+    end
+    result
   end
 
   def [](index)
@@ -71,7 +88,7 @@ class Series
         puts "#{time[1]} \t #{open[1]} \t #{high[1]} \t #{low[1]} \t #{close[1]} \t #{volume[1]}                "
         c = self.time[0]
       end
-      sleep 1
+      sleep
     end
   end
 
