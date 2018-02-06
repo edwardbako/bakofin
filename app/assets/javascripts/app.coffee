@@ -27,7 +27,7 @@
           tickInterval: 60
         },
         yAxis: [{
-          type: 'linear', #'logarithmic'
+          type: 'logarithmic', #'logarithmic'
           labels: {
             align: 'right',
             x: -3
@@ -35,7 +35,7 @@
           title: {
             text: 'OHLC'
           },
-          height: '60%',
+          height: '80%',
           lineWidth: 2
         }, {
           labels: {
@@ -45,14 +45,15 @@
           title: {
             text: 'Volume'
           },
-          top: '65%',
-          height: '35%',
+          top: '85%',
+          height: '15%',
           offset: 0,
           lineWidth: 2
         }]
         ,
         series: [
           {
+            id: 'qq',
             name: 'XAUUSD',
             type: "candlestick",
             data: quotes,
@@ -64,6 +65,10 @@
             data: volumes,
             yAxis: 1,
             animation: {duration: 0}
+          },
+          {
+            type: 'bb',
+            linkedTo: 'qq'
           }
         ],
         chart: {

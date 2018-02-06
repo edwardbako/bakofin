@@ -25,3 +25,6 @@
 #= require bootstrap.min
 
 #= require highstock.js
+#= require Highcharts-5.0.12/code/js/modules/exporting.js
+#= require indicators/indicators.js
+#= require indicators/bollinger-bands.js
