@@ -11,10 +11,10 @@ class QuotesController < ApplicationController
   end
 
   def show
-    quote = @series[0]
+    quotes = @series[0..1]
     render json: {
-             quotes: quote.to_json(only: [:open, :high, :low, :close, :x]),
-             volumes: quote.to_json(only: [:x, :y])
+             quotes: quotes.to_json(only: [:open, :high, :low, :close, :x]),
+             volumes: quotes.to_json(only: [:x, :y])
            }
   end
 

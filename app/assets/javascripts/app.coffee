@@ -80,7 +80,7 @@
                 v = @.series[1]
                 l = q.points.length
                 $.getJSON('/quotes/0', (result)=>
-                  point = {
+                  points = {
                     quotes: $.parseJSON result.quotes
                     volumes: $.parseJSON result.volumes
                   }
@@ -88,12 +88,18 @@
                     quotes: q.points[l-1]
                     volumes: v.points[l-1]
                   }
-                  if last.quotes.x != point.quotes.x
-                    q.addPoint(point.quotes)
-                    v.addPoint(point.volumes)
+                  prev = {
+                    quotes: q.points[l-1]
+                    volumes: v.points[l-1]
+                  }
+                  if last.quotes.x != points.quotes[1].x
+                    q.addPoint(points.quotes[1])
+                    v.addPoint(points.volumes[0])
+                    prev.quotes.update(points.quotes[0])
+                    prev.volumes.update(points.volumes[0])
                   else
-                    last.quotes.update(point.quotes)
-                    last.volumes.update(point.volumes)
+                    last.quotes.update(points.quotes[1])
+                    last.volumes.update(points.volumes[1])
 
 #                  console.log l
 #                  console.log last.quotes.x == point.quotes.x
