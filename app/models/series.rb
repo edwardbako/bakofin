@@ -1,6 +1,7 @@
 class Series
   include ActiveModel::Model
   include Redis::Objects
+  # include Enumerable
 
   attr_accessor :symbol, :timeframe
 
@@ -24,7 +25,7 @@ class Series
 
   def at(index)
     if index.is_a? Integer
-      result = {
+      result = [{
         time: time[index],
         x: time[index].to_i * 1000,
         open: open[index],
@@ -33,16 +34,16 @@ class Series
         close: close[index],
         volume: volume[index],
         y: volume[index]
-      }
+      }]
     else
-      result = time[index].reverse.map { |v| {time: v} }
-      x = time[index].reverse.map { |v| {x: v.to_i * 1000} }
-      o = open[index].reverse.map { |v| {open: v} }
-      h = high[index].reverse.map { |v| {high: v} }
-      l = low[index].reverse.map { |v| {low: v} }
-      c = close[index].reverse.map { |v| {close: v} }
-      v = volume[index].reverse.map { |v| {volume: v} }
-      y = volume[index].reverse.map { |v| {y: v} }
+      result = time[index].map { |v| {time: v} }
+      x = time[index].map { |v| {x: v.to_i * 1000} }
+      o = open[index].map { |v| {open: v} }
+      h = high[index].map { |v| {high: v} }
+      l = low[index].map { |v| {low: v} }
+      c = close[index].map { |v| {close: v} }
+      v = volume[index].map { |v| {volume: v} }
+      y = volume[index].map { |v| {y: v} }
       result.each_with_index do |q, i|
         q.merge!(o[i]).merge!(h[i]).merge!(l[i]).merge!(c[i]).merge!(v[i]).merge!(x[i]).merge!(y[i])
       end
@@ -54,7 +55,9 @@ class Series
     at index
   end
 
-
+  def iMA(**args)
+    MA.new **args.merge(series: self)
+  end
 
 
 end

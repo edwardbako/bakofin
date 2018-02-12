@@ -11,6 +11,8 @@
     $.getJSON('/quotes', (result)->
       quotes = $.parseJSON result.quotes
       volumes = $.parseJSON result.volumes
+      sma = $.parseJSON result.sma
+      ema = $.parseJSON result.ema
 
       App.myChart = Highcharts.stockChart('chart', {
         title: {
@@ -67,8 +69,14 @@
             animation: {duration: 0}
           },
           {
-            type: 'bb',
-            linkedTo: 'qq'
+            name: 'ma',
+            type: 'line',
+            data: sma
+          },
+          {
+            name: 'ema',
+            type: 'line',
+            data: ema
           }
         ],
         chart: {
@@ -78,28 +86,42 @@
               setInterval((()=>
                 q = @.series[0]
                 v = @.series[1]
+                sma = @.series[2]
+                ema = @.series[3]
                 l = q.points.length
                 $.getJSON('/quotes/0', (result)=>
                   points = {
                     quotes: $.parseJSON result.quotes
                     volumes: $.parseJSON result.volumes
+                    sma: $.parseJSON result.sma
+                    ema: $.parseJSON result.ema
                   }
                   last = {
                     quotes: q.points[l-1]
                     volumes: v.points[l-1]
+                    sma: sma.points[l-1]
+                    ema: ema.points[l-1]
                   }
                   prev = {
                     quotes: q.points[l-1]
                     volumes: v.points[l-1]
+                    sma: sma.points[l-1]
+                    ema: ema.points[l-1]
                   }
                   if last.quotes.x != points.quotes[1].x
                     q.addPoint(points.quotes[1])
-                    v.addPoint(points.volumes[0])
+                    v.addPoint(points.volumes[1])
+                    sma.addPoint(points.sma[1])
+                    ema.addPoint(points.ema[1])
                     prev.quotes.update(points.quotes[0])
                     prev.volumes.update(points.volumes[0])
+                    prev.sma.update(points.sma[0])
+                    prev.ema.update(points.ema[0])
                   else
                     last.quotes.update(points.quotes[1])
                     last.volumes.update(points.volumes[1])
+                    last.sma.update(points.sma[1])
+                    last.ema.update(points.ema[1])
 
 #                  console.log l
 #                  console.log last.quotes.x == point.quotes.x

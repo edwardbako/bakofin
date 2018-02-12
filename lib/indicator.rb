@@ -1,4 +1,4 @@
-class Indicators
+class Indicator
 
   def initialize
 
