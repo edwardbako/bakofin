@@ -1,5 +1,5 @@
 # Moving Average technical indicator
-class MA < Indicator
+class Indicator::MA
 
   attr_reader :series, :period, :shift, :method, :price, :size
 

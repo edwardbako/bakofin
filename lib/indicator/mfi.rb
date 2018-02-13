@@ -1,5 +1,5 @@
 # Money Flow Index technical indicator
-class MFI < Indicator
+class Indicator::MFI
 
   attr_reader :series, :period
 

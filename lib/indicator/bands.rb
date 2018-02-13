@@ -1,6 +1,6 @@
 require 'matrix'
 # Bollinger bands technical indicator
-class Bands < Indicator
+class Indicator::Bands
 
   attr_reader :series, :period, :deviation, :shift, :ma_method, :price, :size
   # attr_accessor :index

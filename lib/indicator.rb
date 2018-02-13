@@ -1,7 +1,7 @@
-class Indicator
+module Indicator
 
-  def initialize
-
-  end
+  # def initialize
+  #
+  # end
 
 end

@@ -55,9 +55,19 @@ class Series
     at index
   end
 
+  def index_of_time(ti)
+    i = 0
+    time.each do |t|
+      break if t < ti
+      i += 1
+    end
+    i
+  end
+
   [:MA, :Bands, :MFI].each do |m|
-    define_method m do |**args|
-      m.to_s.constantize.new(**args.merge(series: self))
+    define_method "i#{m}" do |**args|
+      # noinspection RubyArgCount
+      "Indicator::#{m}".constantize.new(**args.merge(series: self))
     end
   end
 
