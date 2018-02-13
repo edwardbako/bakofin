@@ -20,11 +20,22 @@ class Bands < Indicator
     times.zip(middle_line, top_line, bottom_line)
   end
 
+  def percent_b(index)
+    bb_enum = self[index].each
+    s_enum = @series[index].reverse.each
+    result = []
+    loop do
+      bb = bb_enum.next
+      result << (applied_price(s_enum.next) - bb[3]) / (bb[2] - bb[3]) * 100
+    end
+    result
+  end
+
   private
 
   def middle_line
     @middle_line ||= MA.new(series: series, period: period, shift: shift, method: ma_method,
-           price: price)[index].map { |ma| ma[1]}
+           price: price)[@index].map { |ma| ma[1]}
   end
 
   def top_line
