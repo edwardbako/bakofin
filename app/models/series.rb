@@ -55,12 +55,10 @@ class Series
     at index
   end
 
-  def iMA(**args)
-    MA.new **args.merge(series: self)
-  end
-
-  def iBands(**args)
-    Bands.new **args.merge(series: self)
+  [:MA, :Bands, :MFI].each do |m|
+    define_method m do |**args|
+      m.to_s.constantize.new(**args.merge(series: self))
+    end
   end
 
 end

@@ -3,7 +3,7 @@ require 'matrix'
 class Bands < Indicator
 
   attr_reader :series, :period, :deviation, :shift, :ma_method, :price, :size
-  attr_accessor :index
+  # attr_accessor :index
 
   def initialize(series: nil, period: 20, deviation: 2.0, shift: 0, ma_method: :sma, price: :typical)
     @series = series
