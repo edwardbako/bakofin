@@ -59,5 +59,8 @@ class Series
     MA.new **args.merge(series: self)
   end
 
+  def iBands(**args)
+    Bands.new **args.merge(series: self)
+  end
 
 end

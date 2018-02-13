@@ -77,6 +77,11 @@
             name: 'ema',
             type: 'line',
             data: ema
+          },
+          {
+            name: 'bands',
+            type: 'bb',
+            linkedTo: 'qq'
           }
         ],
         chart: {

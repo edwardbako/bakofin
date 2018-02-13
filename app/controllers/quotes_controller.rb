@@ -8,8 +8,8 @@ class QuotesController < ApplicationController
     render json: {
              quotes: quotes.to_json(only: [:open, :high, :low, :close, :x]),
              volumes: quotes.to_json(only: [:x, :y]),
-             sma: @series.iMA(method: :sma)[range].to_json,
-             ema: @series.iMA(method: :lwma)[range].to_json
+             sma: @series.iBands(ma_method: :ema)[range].to_json,
+             ema: @series.iBands(ma_method: :ema)[range].map {|v| [v[0], v[2]]}.to_json
            }
   end
 
@@ -20,7 +20,7 @@ class QuotesController < ApplicationController
              quotes: quotes.to_json(only: [:open, :high, :low, :close, :x]),
              volumes: quotes.to_json(only: [:x, :y]),
              sma: @series.iMA(method: :sma)[range].to_json,
-             ema: @series.iMA(method: :lwma)[range].to_json
+             ema: @series.iBands[range].to_json
            }
   end
 
