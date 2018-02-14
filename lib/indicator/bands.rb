@@ -6,6 +6,7 @@ class Indicator::Bands
   # attr_accessor :index
 
   def initialize(series: nil, period: 20, deviation: 2.0, shift: 0, ma_method: :sma, price: :typical)
+    raise Indicator::BlankSeriesError if series.blank?
     @series = series
     @period = period
     @deviation = deviation

@@ -4,6 +4,7 @@ class Indicator::MFI
   attr_reader :series, :period
 
   def initialize(series: nil, period: 14)
+    raise Indicator::BlankSeriesError if series.blank?
     @series = series
     @period = period
   end

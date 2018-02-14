@@ -3,6 +3,13 @@ class Series
   include Redis::Objects
   # include Enumerable
 
+  class RecordInvalid < StandardError; end
+
+  def initialize(attributes={})
+    super
+    raise RecordInvalid, errors.full_messages.join(', ') unless valid?
+  end
+
   attr_accessor :symbol, :timeframe
 
   validates_presence_of :symbol, :timeframe
@@ -15,12 +22,7 @@ class Series
   list :volume, marshal: true, map: :to_i
 
   def id
-    if valid?
-      "#{symbol}:#{timeframe}"
-    else
-      Rails.logger.error "Record invalid: #{errors.full_messages.join(', ')}"
-      nil
-    end
+    "#{symbol}:#{timeframe}"
   end
 
   def at(index)

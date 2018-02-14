@@ -4,6 +4,7 @@ class Indicator::MA
   attr_reader :series, :period, :shift, :method, :price, :size
 
   def initialize(series: nil, period: 20, shift: 0, method: :sma, price: :typical)
+    raise Indicator::BlankSeriesError if series.blank?
     @series = series
     @period = period
     @shift = shift
