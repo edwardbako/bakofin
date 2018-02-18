@@ -2,8 +2,10 @@ class Series
   include ActiveModel::Model
   include Redis::Objects
   # include Enumerable
+  Concurrent
 
-  class RecordInvalid < StandardError; end
+  class Error < StandardError; end
+  class RecordInvalid < Error; end
 
   def initialize(attributes={})
     super
@@ -14,7 +16,7 @@ class Series
 
   validates_presence_of :symbol, :timeframe
 
-  list :time, marshal: true, map: :to_time
+  list :time#, marshal: true, map: :to_time
   list :open, marshal: true, map: :to_f
   list :high, marshal: true, map: :to_f
   list :low, marshal: true, map: :to_f
@@ -23,6 +25,10 @@ class Series
 
   def id
     "#{symbol}:#{timeframe}"
+  end
+
+  def time_parsed
+    time.map { |v| Time.rfc3339 v}
   end
 
   def at(index)
@@ -57,10 +63,13 @@ class Series
     at index
   end
 
-  def index_of_time(ti)
+  def index_by(**params)
+    unless params.key?(:time)
+      raise NotImplementedError, "Object of class #{self.class.to_s} searches index only by time field."
+    end
     i = 0
     time.each do |t|
-      break if t < ti
+      break if Time.rfc3339(t) < params[:time]
       i += 1
     end
     i
