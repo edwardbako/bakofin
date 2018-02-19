@@ -1,25 +1,33 @@
-class Quote < ApplicationRecord
-  ActiveModel::Model
-  belongs_to :symb
+class Quote
+  include ActiveModel::Model
+  include ActiveModel::Serializers::JSON
 
-  scope :m1, -> { where(timeframe: 1) }
-  scope :m5, -> { where(timeframe: 5) }
-  scope :m15, -> { where(timeframe: 15) }
-  scope :m30, -> { where(timeframe: 30) }
-  scope :h1, -> { where(timeframe: 60) }
-  scope :h4, -> { where(timeframe: 240) }
-  scope :d1, -> { where(timeframe: 1440) }
+  attr_accessor :time, :open, :high, :low, :close, :volume
+
+  def attributes
+    {time: nil, open: nil, high: nil, low: nil, close: nil, volume: nil}.stringify_keys
+  end
+
+  alias_method :y, :volume
 
   def x
     time.to_i * 1000
   end
 
-  def y
-    volume
-  end
-
   def name
     time.to_formatted_s
+  end
+
+  def medial
+    (high + low) / 2
+  end
+
+  def typical
+    (high + low + close) / 3
+  end
+
+  def weighted
+    (high + low + 2 * close) / 4
   end
 
 end

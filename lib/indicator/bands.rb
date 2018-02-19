@@ -35,7 +35,7 @@ class Indicator::Bands
   private
 
   def middle_line
-    @middle_line ||= MA.new(series: series, period: period, shift: shift, method: ma_method,
+    @middle_line ||= Indicator::MA.new(series: series, period: period, shift: shift, method: ma_method,
            price: price)[@index].map { |ma| ma[1]}
   end
 
@@ -66,7 +66,7 @@ class Indicator::Bands
         if i >= period
           sum = 0
           period.times do |j|
-            sum += (applied_price(@series_to_calculate[i - j]) - middle_line[i-period])**2
+            sum += (@series_to_calculate[i - j].send(price) - middle_line[i-period])**2
           end
           @deviations << Math.sqrt(sum / period)
         end
@@ -76,32 +76,13 @@ class Indicator::Bands
   end
 
   def times
-    @series_to_calculate.select.with_index { |q, i| i >= period }.map {|q| q[:time].to_i * 1000}
+    @series_to_calculate.select.with_index { |q, i| i >= period }.map { |q| q.x }
   end
 
   def series_to_calculate(index)
     start = index.is_a?(Range) ? index.first : index
     stop = index.is_a?(Range) ? index.last + period : index + period
-    @series[start..stop].reverse
-  end
-
-  def applied_price(rate)
-    case price
-      when :open
-        rate[:open]
-      when :high
-        rate[:high]
-      when :low
-        rate[:low]
-      when :medial # HL/2
-        (rate[:high] + rate[:low]) / 2
-      when :typical # HLC/3
-        (rate[:high] + rate[:low] + rate[:close]) / 3
-      when :weighted # HLCC/4
-        (rate[:high] + rate[:low] + 2*rate[:close] ) / 4
-      else
-        rate[:close]
-    end
+    series[start..stop].reverse
   end
 
 end

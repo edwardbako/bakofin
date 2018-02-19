@@ -25,10 +25,10 @@ class Indicator::MA
     result = []
 
     @series_to_calculate.each_with_index do |q, i|
-      sum += applied_price(q)
-      sum -= applied_price(@series_to_calculate[i - period]) if i >= period
+      sum += q.send(price)
+      sum -= @series_to_calculate[i - period].send(price) if i >= period
       if i >= period and i + shift < @size
-        result << [@series_to_calculate[i+shift][:time].to_i * 1000,
+        result << [@series_to_calculate[i+shift].x,
                    (sum / (i >= period ? period : i+1)).round(2)]
       end
     end
@@ -41,11 +41,11 @@ class Indicator::MA
     p = 2 / (period + 1).to_f
 
     @series_to_calculate.each_with_index do |q, i|
-      sum += applied_price(q) if i < period
+      sum += q.send(price) if i < period
       prev = result.present? ? result.last[1] : sum / period
       if i >= period and i + shift < @size
-        result << [@series_to_calculate[i+shift][:time].to_i * 1000,
-                   ((applied_price(q) - prev) *  p + prev).round(2)]
+        result << [@series_to_calculate[i+shift].x,
+                   ((q.send(price) - prev) *  p + prev).round(2)]
       end
     end
     result
@@ -56,11 +56,11 @@ class Indicator::MA
     result = []
 
     @series_to_calculate.each_with_index do |q, i|
-      sum += applied_price(q) if i < period
+      sum += q.send(price) if i < period
       prev = result.present? ? result.last[1] : sum / period
       if i >= period and i + shift < @size
-        result << [@series_to_calculate[i+shift][:time].to_i * 1000,
-                   ((prev * (period - 1) + applied_price(q)) / period).round(2)]
+        result << [@series_to_calculate[i+shift].x,
+                   ((prev * (period - 1) + q.send(price)) / period).round(2)]
       end
     end
     result
@@ -74,9 +74,9 @@ class Indicator::MA
       if i >= period and i + shift < @size
         sum = 0
         period.times do |j|
-          sum += applied_price(@series_to_calculate[i - j]) * (period - j)
+          sum += @series_to_calculate[i - j].send(price) * (period - j)
         end
-        result << [@series_to_calculate[i+shift][:time].to_i * 1000,
+        result << [@series_to_calculate[i+shift].x,
                    (sum/wsum).round(2)]
       end
     end
@@ -86,26 +86,7 @@ class Indicator::MA
   def series_to_calculate(index)
     start = index.is_a?(Range) ? index.first : index
     stop = index.is_a?(Range) ? index.last + period : index + period
-    @series[start..stop].reverse
-  end
-
-  def applied_price(rate)
-    case price
-      when :open
-        rate[:open]
-      when :high
-        rate[:high]
-      when :low
-        rate[:low]
-      when :medial # HL/2
-        (rate[:high] + rate[:low]) / 2
-      when :typical # HLC/3
-        (rate[:high] + rate[:low] + rate[:close]) / 3
-      when :weighted # HLCC/4
-        (rate[:high] + rate[:low] + 2*rate[:close] ) / 4
-      else
-        rate[:close]
-    end
+    series[start..stop].reverse
   end
 
 end

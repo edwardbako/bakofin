@@ -20,9 +20,9 @@ class Indicator::MFI
       prev = nil
       series_to_calculate(range).map do |q|
         if prev.present?
-          mf = price(q) * q[:volume] * (price(q) >= prev ? 1 : -1)
+          mf = q.typical * q.volume * (q.typical >= prev ? 1 : -1)
         end
-        prev = price(q)
+        prev = q.typical
         mf
       end
     end
@@ -54,7 +54,7 @@ class Indicator::MFI
     @series_to_calculate ||= begin
       start = index.is_a?(Range) ? index.first : index
       stop = index.is_a?(Range) ? index.last + period : index + period
-      @series[start..stop].reverse
+      series[start..stop].reverse
     end
   end
 end

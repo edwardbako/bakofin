@@ -6,10 +6,10 @@ class QuotesController < ApplicationController
     range = 0..100
     quotes = @series[range].reverse
     render json: {
-             quotes: quotes.to_json(only: [:open, :high, :low, :close, :x]),
-             volumes: quotes.to_json(only: [:x, :y]),
-             sma: @series.iBands(ma_method: :ema)[range].to_json,
-             ema: @series.iBands(ma_method: :ema)[range].map {|v| [v[0], v[2]]}.to_json
+             quotes: quotes.to_json(only: [:open, :high, :low, :close], methods: [:x]),
+             volumes: quotes.to_json(only: [], methods: [:x, :y]),
+             sma: @series.iBands[range].to_json,
+             ema: @series.iBands[range].map {|v| [v[0], v[2]]}.to_json
            }
   end
 
@@ -17,8 +17,8 @@ class QuotesController < ApplicationController
     range = 0..1
     quotes = @series[range].reverse
     render json: {
-             quotes: quotes.to_json(only: [:open, :high, :low, :close, :x]),
-             volumes: quotes.to_json(only: [:x, :y]),
+             quotes: quotes.to_json(only: [:open, :high, :low, :close], methods: [:x]),
+             volumes: quotes.to_json(only: [], methods: [:x, :y]),
              sma: @series.iMA(method: :sma)[range].to_json,
              ema: @series.iBands[range].to_json
            }

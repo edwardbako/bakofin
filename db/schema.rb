@@ -10,30 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170719100645) do
+ActiveRecord::Schema.define(version: 20180219072149) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "quotes", force: :cascade do |t|
-    t.datetime "time"
-    t.float "open"
-    t.float "high"
-    t.float "low"
-    t.float "close"
-    t.integer "volume"
-    t.integer "timeframe"
-    t.bigint "symb_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["symb_id"], name: "index_quotes_on_symb_id"
-  end
-
-  create_table "symbs", force: :cascade do |t|
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_foreign_key "quotes", "symbs"
 end
