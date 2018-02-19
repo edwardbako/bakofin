@@ -29,7 +29,7 @@ class Indicator::MA
       sum -= @series_to_calculate[i - period].send(price) if i >= period
       if i >= period and i + shift < @size
         result << [@series_to_calculate[i+shift].x,
-                   (sum / (i >= period ? period : i+1)).round(2)]
+                   (sum / (i >= period ? period : i+1)).round(digits)]
       end
     end
     result
@@ -45,7 +45,7 @@ class Indicator::MA
       prev = result.present? ? result.last[1] : sum / period
       if i >= period and i + shift < @size
         result << [@series_to_calculate[i+shift].x,
-                   ((q.send(price) - prev) *  p + prev).round(2)]
+                   ((q.send(price) - prev) *  p + prev).round(digits)]
       end
     end
     result
@@ -60,7 +60,7 @@ class Indicator::MA
       prev = result.present? ? result.last[1] : sum / period
       if i >= period and i + shift < @size
         result << [@series_to_calculate[i+shift].x,
-                   ((prev * (period - 1) + q.send(price)) / period).round(2)]
+                   ((prev * (period - 1) + q.send(price)) / period).round(digits)]
       end
     end
     result
@@ -77,10 +77,14 @@ class Indicator::MA
           sum += @series_to_calculate[i - j].send(price) * (period - j)
         end
         result << [@series_to_calculate[i+shift].x,
-                   (sum/wsum).round(2)]
+                   (sum/wsum).round(digits)]
       end
     end
     result
+  end
+
+  def digits
+    @digits ||= series.digits
   end
 
   def series_to_calculate(index)

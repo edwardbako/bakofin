@@ -44,7 +44,7 @@ class Indicator::Bands
     ml_enum = @middle_line.each
     dev_enum = deviations.each
     loop do
-      @top_line << (ml_enum.next + deviation * dev_enum.next).round(2)
+      @top_line << (ml_enum.next + deviation * dev_enum.next).round(digits)
     end
     @top_line
   end
@@ -54,7 +54,7 @@ class Indicator::Bands
     ml_enum = @middle_line.each
     dev_enum = deviations.each
     loop do
-      @bottom_line << (ml_enum.next - deviation * dev_enum.next).round(2)
+      @bottom_line << (ml_enum.next - deviation * dev_enum.next).round(digits)
     end
     @bottom_line
   end
@@ -83,6 +83,10 @@ class Indicator::Bands
     start = index.is_a?(Range) ? index.first : index
     stop = index.is_a?(Range) ? index.last + period : index + period
     series[start..stop].reverse
+  end
+
+  def digits
+    @digits ||= series.digits
   end
 
 end

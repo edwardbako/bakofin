@@ -5,6 +5,7 @@ class Series
 
   class Error < StandardError; end
   class RecordInvalid < Error; end
+  class NoDataError < Error; end
 
   def initialize(attributes={})
     super
@@ -33,6 +34,12 @@ class Series
     at index
   end
 
+  def digits
+    self[0..10].map do |q|
+      [:open, :high, :low, :close].map { |m| q.send(m).to_s.split('.')[1].size }.max
+    end.max
+  end
+
   def index_by(**params)
     unless params.key?(:time)
       raise NotImplementedError, "Object of class #{self.class.to_s} searches index only by time field."
@@ -59,6 +66,10 @@ class Series
   private
 
   def parse_quote(str)
+    if str.blank?
+      raise NoDataError, "There is no data available for #{symbol} symbol on #{timeframe} timeframe"
+    end
+
     data = str.split('|')
     Quote.new time: Time.rfc3339(data[0]),
               open: data[1].to_f,
