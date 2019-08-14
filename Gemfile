@@ -45,7 +45,7 @@ gem 'sidekiq' # Queueing framework
 gem 'sidekiq-cron' # Cron jobs for queueing
 gem 'sinatra', :require => nil
 
-gem 'bcrypt', '~> 3.1.7' # Use ActiveModel has_secure_password
+gem 'bcrypt' # Use ActiveModel has_secure_password
 gem 'devise' # Rack authentication
 
 gem 'money-rails'
@@ -60,11 +60,13 @@ gem 'pry-rails'
 gem 'pry-doc'
 gem 'pry-stack_explorer'
 gem 'colorize' # Colorize strings output
+gem 'highline'
+gem 'table_print'
 
 group :development, :test do
   gem 'rspec-rails' # RSpec testing framework
   gem 'cucumber-rails', :require => false
-  gem 'factory_girl_rails'
+  # gem 'factory_girl_rails'
 end
 
 group :development do
