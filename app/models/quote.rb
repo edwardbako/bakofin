@@ -30,4 +30,13 @@ class Quote
     (high + low + 2 * close) / 4
   end
 
+  def to_s
+    "time=" + "#{time}".blue.bold +
+    ",\t open=" + "#{open}".magenta.bold +
+    ",\t high=" + "#{high}".magenta.bold +
+    ",\t low=" + "#{low}".magenta.bold +
+    ",\t close=" + "#{close}".magenta.bold +
+    ",\t volume=" + "#{volume}".yellow.bold
+  end
+
 end

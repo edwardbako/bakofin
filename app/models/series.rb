@@ -1,3 +1,9 @@
+# == Series
+#
+# Retrieving quotes data from Redis. Requires Redis to store list in the following format:
+#
+#   "yyyy-mm-ddThh:mm:ss+00:00|open|high|low|close|volume"
+
 class Series
   include ActiveModel::Model
   include Redis::Objects
@@ -12,14 +18,18 @@ class Series
     raise RecordInvalid, errors.full_messages.join(', ') unless valid?
   end
 
-  attr_accessor :symbol, :timeframe
+  attr_accessor :symbol, :timeframe, :test
 
   validates_presence_of :symbol, :timeframe
 
   list :data
 
   def id
-    "#{symbol}:#{timeframe}"
+    "#{symbol}:#{timeframe}#{test ? ':test' : ''}"
+  end
+
+  def size
+    data.size
   end
 
   def at(index)
@@ -34,10 +44,18 @@ class Series
     at index
   end
 
+  def last
+    at 0
+  end
+
+  alias_method :current, :last
+
+  def specification
+    Specification.where(symbol: symbol).first
+  end
+
   def digits
-    self[0..10].map do |q|
-      [:open, :high, :low, :close].map { |m| q.send(m).to_s.split('.')[1].size }.max
-    end.max
+    specification.precision
   end
 
   def index_by(**params)
@@ -52,15 +70,28 @@ class Series
     i
   end
 
-  [:MA, :Bands, :MFI].each do |m|
+  def all
+    data.map {|q| parse_quote q}
+  end
+
+  def time_period(from: nil, to: nil)
+    if from.present? && to.present?
+      raise Error, ':from time must be earlier than :to time' if to < from
+    end
+    start = from.present? ? index_by(time: from) : size
+    stop = to.present? ? index_by(time: to)-1 : 0
+    self[stop..start]
+  end
+
+  private_class_method def self._indicators_list
+    Dir.entries("lib/indicator")[2..-1].map {|x| File.basename(x, ".rb").camelize }
+  end
+
+  _indicators_list.each do |m|
     define_method "i#{m}" do |**args|
       # noinspection RubyArgCount
       "Indicator::#{m}".constantize.new(**args.merge(series: self))
     end
-  end
-
-  def all
-    data.map {|q| parse_quote q}
   end
 
   private
@@ -78,5 +109,6 @@ class Series
               close: data[4].to_f,
               volume: data[5].to_i
   end
+
 
 end
