@@ -46,6 +46,7 @@ class QuotesLoader
   end
 
   def load_to_redis
+    puts "LOADING TO REDIS"
     $redis.del redis_key
 
     i = 0
@@ -53,7 +54,9 @@ class QuotesLoader
       $redis.lpush redis_key, formatted_quote(q)
       i += 1
       yield i, size if block_given?
+      print "\rProcessed #{i} / #{size} bars"
     end
+    puts "\n\n"
   ensure
     $redis.del redis_key if test
   end
