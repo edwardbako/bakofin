@@ -140,7 +140,6 @@ class Account < ApplicationRecord
   end
 
   def report
-    Money.locale_backend = nil
     ActiveRecord::Base.logger.silence do
       puts "Report on Account: #{login}".bold
       puts "-----------------"

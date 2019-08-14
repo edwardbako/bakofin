@@ -19,6 +19,8 @@ class TestPass < ApplicationRecord
 
   def report
     puts "Report on TestPass ##{id} on symbol: #{symbol}, timeframe: #{timeframe}"
+    puts "Bars processed \t\t\t" + "#{bars_processed}".bold
+    puts "---------------"
     account.report
   end
 
