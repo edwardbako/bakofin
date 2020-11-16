@@ -58,30 +58,30 @@ class Series
     specification.precision
   end
 
-  def index_by(**params)
-    unless params.key?(:time)
-      raise NotImplementedError, "Object of class #{self.class.to_s} searches index only by time field."
-    end
-    i = 0
-    all.each do |q|
-      break if q.time < params[:time]
-      i += 1
-    end
-    i
-  end
+  # def index_by(**params)
+  #   unless params.key?(:time)
+  #     raise NotImplementedError, "Object of class #{self.class.to_s} searches index only by time field."
+  #   end
+  #   i = 0
+  #   all.each do |q|
+  #     break if q.time < params[:time] #TODO What if date not found?
+  #     i += 1
+  #   end
+  #   i
+  # end
 
   def all
     data.map {|q| parse_quote q}
   end
 
-  def time_period(from: nil, to: nil)
-    if from.present? && to.present?
-      raise Error, ':from time must be earlier than :to time' if to < from
-    end
-    start = from.present? ? index_by(time: from) : size
-    stop = to.present? ? index_by(time: to)-1 : 0
-    self[stop..start]
-  end
+  # def time_period(from: nil, to: nil)
+  #   if from.present? && to.present?
+  #     raise Error, ':from time must be earlier than :to time' if to < from
+  #   end
+  #   start = from.present? ? index_by(time: from) : size
+  #   stop = to.present? ? index_by(time: to)-1 : 0
+  #   self[stop..start]
+  # end
 
   private_class_method def self._indicators_list
     Dir.entries("lib/indicator")[2..-1].map {|x| File.basename(x, ".rb").camelize }
