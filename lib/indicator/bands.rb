@@ -1,92 +1,100 @@
 require 'matrix'
-# Bollinger bands technical indicator
-class Indicator::Bands
+# == Bollinger bands technical indicator
+#
+# Accepts arguments
+#   * series
+#   * period
+#   * deviation
+#   * ma_method
+#   * price
+#
+class Indicator::Bands < Indicator
 
-  attr_reader :series, :period, :deviation, :shift, :ma_method, :price, :size
-  # attr_accessor :index
+  attr_reader :deviations, :ma_method, :price
 
-  def initialize(series: nil, period: 20, deviation: 2.0, shift: 0, ma_method: :sma, price: :typical)
-    raise Indicator::BlankSeriesError if series.blank?
-    @series = series
-    @period = period
-    @deviation = deviation
-    @shift = shift
-    @ma_method = ma_method
-    @price = price
-  end
-  
-  def [](index)
-    @index = index
-    @series_to_calculate = series_to_calculate(index)
-    times.zip(middle_line, top_line, bottom_line)
-  end
-
-  def percent_b(index)
-    bb_enum = self[index].each
-    s_enum = @series[index].reverse.each
-    result = []
-    loop do
-      bb = bb_enum.next
-      result << (applied_price(s_enum.next) - bb[3]) / (bb[2] - bb[3]) * 100
+  class IncorrectMethodError < Indicator::Error
+    def message
+      super + "Incorrect method."
     end
-    result
   end
 
   private
 
-  def middle_line
-    @middle_line ||= Indicator::MA.new(series: series, period: period, shift: shift, method: ma_method,
-           price: price)[@index].map { |ma| ma[1]}
+  def local_defaults
+    {
+        period: 20,
+        deviations: 2.0,
+        ma_method: :sma,
+        price: :typical
+    }
   end
 
-  def top_line
-    @top_line = []
-    ml_enum = @middle_line.each
-    dev_enum = deviations.each
-    loop do
-      @top_line << (ml_enum.next + deviation * dev_enum.next).round(digits)
-    end
-    @top_line
-  end
+  def calculations
+    i = start
+    line = new_line
 
-  def bottom_line
-    @bottom_line = []
-    ml_enum = @middle_line.each
-    dev_enum = deviations.each
-    loop do
-      @bottom_line << (ml_enum.next - deviation * dev_enum.next).round(digits)
-    end
-    @bottom_line
-  end
+    while i >= stop
+      if i < size + stop
+        middle = ma[i].main
+        dev = deviation(i)
+        up = upper(middle, dev)
+        low = lower(middle, dev)
+        p_b = percent_b(i, up, low)
 
-  def deviations
-    if @deviations.blank?
-      @deviations = []
-      @series_to_calculate.each_with_index do |q, i|
-        if i >= period
-          sum = 0
-          period.times do |j|
-            sum += (@series_to_calculate[i - j].send(price) - middle_line[i-period])**2
-          end
-          @deviations << Math.sqrt(sum / period)
-        end
+        line << bar(i, middle, up, low, dev, p_b)
       end
+
+      i -= 1
     end
-    @deviations
+
+    line.reverse!
   end
 
-  def times
-    @series_to_calculate.select.with_index { |q, i| i >= period }.map { |q| q.x }
+  def bar(index, middle, up, low, dev, p_b)
+    new_bar(
+        time: series[index - shift].time,
+        middle: middle,
+        upper: up,
+        lower: low,
+        deviation: dev,
+        percent_b: p_b
+    )
   end
 
-  def series_to_calculate(index)
-    start = index.is_a?(Range) ? index.first : index
-    stop = index.is_a?(Range) ? index.last + period : index + period
-    series[start..stop].reverse
+  def ma
+    @ma ||= Indicator::Ma.new(series: series, period: period, shift: shift, method: ma_method, price:  price)
   end
 
-  def digits
-    @digits ||= series.digits
+  def deviation(index)
+    sum = 0
+    main = ma[index].main
+    period.times do |j|
+      sum += (value(index + j) - main) ** 2
+    end
+    Math.sqrt(sum / (period - 1)).round(digits)
   end
+
+  def value(index)
+    q = series[index]
+
+    unless q.respond_to?(price)
+      raise Indicator::IncorrectPriceError
+    end
+
+    q.send price
+  end
+
+  def upper(middle, dev)
+    (middle + deviations * dev).round(digits)
+  end
+
+  def lower(middle, dev)
+    (middle - deviations * dev).round(digits)
+  end
+
+  def percent_b(index, up, low)
+    ((value(index) - low) / (up - low) * 100).round(digits)
+  end
+
 
 end
