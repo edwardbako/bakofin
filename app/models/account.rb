@@ -178,7 +178,8 @@ class Account < ApplicationRecord
   end
 
   def profit_factor
-    (total_profit / total_loss.abs).round(2)
+    loss = total_loss < 0 ? total_loss.abs : 0.01
+    (total_profit / loss).round(2)
   end
 
   def recovery_factor
