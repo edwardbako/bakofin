@@ -57,6 +57,12 @@ class Order < ApplicationRecord
     end
   end
 
+  def retention_time
+    if closed?
+      ((close_date - open_date) / 60 / 60 / 24.0).round(2).days
+    end
+  end
+
   private
 
   def specification
