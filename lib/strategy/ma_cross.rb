@@ -1,7 +1,6 @@
 class Strategy::MACross < Strategy
 
   def signal
-    ma = series.iMa(period: 50).current
     case
     when ma.blank?
       :none
@@ -14,5 +13,9 @@ class Strategy::MACross < Strategy
     end
   rescue  Series::NoDataError
     :none
+  end
+
+  def ma
+    series.iMa(period: 50).current
   end
 end

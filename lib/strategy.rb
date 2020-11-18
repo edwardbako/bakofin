@@ -6,8 +6,16 @@ class Strategy
 
   attr_accessor :series
 
-  def initialize(series: nil)
-    @series = series
+  def initialize(**args)
+    args.reverse_merge! defaults
+    args.each do |key, value|
+      instance_variable_set "@#{key}", value
+    end
+
+  end
+
+  def defaults
+    {}
   end
 
   def signal(*args)
