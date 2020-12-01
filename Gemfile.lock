@@ -423,7 +423,7 @@ DEPENDENCIES
   pry-doc
   pry-rails
   pry-stack_explorer
-  puma (~> 3.0)
+  puma (~> 3.12)
   rails
   redis
   redis-objects!
