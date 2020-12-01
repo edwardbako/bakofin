@@ -44,6 +44,7 @@ class Indicator::Ma < Indicator
     sum = 0
     line = new_line
 
+    # TODO Try to implement whith each method on series.
     while i >= stop
       sum += value(i)
 
