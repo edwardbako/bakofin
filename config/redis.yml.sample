@@ -1,0 +1,6 @@
+development:
+  host: localhost
+  port: 6379
+  password: redisPass
+  db: 0
+  driver: hiredis
