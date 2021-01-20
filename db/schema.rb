@@ -17,8 +17,19 @@ ActiveRecord::Schema.define(version: 2019_08_13_073500) do
 
   create_table "accounts", force: :cascade do |t|
     t.string "login"
-    t.string "password_digest"
+    t.string "password"
     t.string "server"
+    t.string "name"
+    t.string "company"
+    t.string "currency"
+    t.integer "leverage"
+    t.integer "stopout_level"
+    t.integer "stopout_mode"
+    t.float "balance"
+    t.float "credit"
+    t.float "equity"
+    t.float "margin"
+    t.float "free_margin"
     t.bigint "test_pass_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -29,20 +40,26 @@ ActiveRecord::Schema.define(version: 2019_08_13_073500) do
     t.string "symbol"
     t.integer "kind"
     t.datetime "open_date"
-    t.float "lot_size"
-    t.integer "open_price_cents", default: 0, null: false
-    t.string "open_price_currency", default: "USD", null: false
-    t.integer "close_price_cents", default: 0, null: false
-    t.string "close_price_currency", default: "USD", null: false
     t.datetime "close_date"
-    t.integer "stop_loss_cents", default: 0, null: false
-    t.string "stop_loss_currency", default: "USD", null: false
-    t.integer "take_profit_cents", default: 0, null: false
-    t.string "take_profit_currency", default: "USD", null: false
+    t.float "lot_size"
+    t.float "open_price_cents"
+    t.string "open_price_currency"
+    t.float "close_price_cents"
+    t.string "close_price_currency"
+    t.float "stop_loss_cents"
+    t.string "stop_loass_currency"
+    t.float "take_profit_cents"
+    t.string "take_profit_currency"
     t.integer "slippage"
     t.text "comment"
     t.string "magic_number"
     t.datetime "expiration"
+    t.float "profit_cents"
+    t.string "profit_currency"
+    t.float "swap_cents"
+    t.string "swap_currency"
+    t.float "commission_cents"
+    t.string "commission_currency"
     t.bigint "account_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -55,6 +72,7 @@ ActiveRecord::Schema.define(version: 2019_08_13_073500) do
     t.integer "stoploss_level"
     t.integer "lot_size"
     t.string "margin_currency", default: "USD", null: false
+    t.string "orders_currency"
     t.integer "leverage"
     t.float "minimum_lot_size"
     t.float "maximum_lot_size"
