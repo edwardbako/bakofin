@@ -12,6 +12,7 @@ Specification.create(
                  stoploss_level: 100,
                  lot_size: 100,
                  margin_currency: "USD",
+                 orders_currency: "USD",
                  leverage: 200,
                  minimum_lot_size: 0.01,
                  maximum_lot_size: 10000.0,
@@ -26,10 +27,26 @@ Specification.create(
                 stoploss_level: 30,
                 lot_size: 100000,
                 margin_currency: "EUR",
+                orders_currency: "USD",
                 leverage: 500,
                 minimum_lot_size: 0.01,
                 maximum_lot_size: 10000.0,
                 lot_size_step: 0.01,
                 short_swap: 1.367,
                 long_swap: -8.813
+)
+
+Specification.create(
+                symbol: :USDRUB,
+                precision: 4,
+                stoploss_level: 50,
+                lot_size: 100000,
+                margin_currency: "USD",
+                orders_currency: "RUB",
+                leverage: 250,
+                minimum_lot_size: 0.01,
+                maximum_lot_size: 10000.0,
+                lot_size_step: 0.01,
+                short_swap: -31.848,
+                long_swap: -186.034
 )
