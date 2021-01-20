@@ -19,9 +19,15 @@
 class Order < ApplicationRecord
 
 
-  enum kind: [:buy, :sell, :balance]
+  enum kind: [:buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance]
 
-  monetize :open_price_cents, :close_price_cents, :stop_loss_cents, :take_profit_cents
+  monetize :open_price_cents,
+           :close_price_cents,
+           :stop_loss_cents,
+           :take_profit_cents,
+           :profit_cents,
+           :swap_cents,
+           :commission_cents
 
   belongs_to :account
 
@@ -43,17 +49,17 @@ class Order < ApplicationRecord
   end
 
   def profit
-    if opened?
-      nil
-    else
+    if close_price.present?
+      Money.add_rate(prices_currency, account_currency, 1 / close_price.to_f) if prices_currency != account_currency
+
       case kind
-      when "buy"
+      when "buy", "buy_limit", "buy_stop"
         (close_price - open_price) * base_lot_size * lot_size
-      when "sell"
+      when "sell", "sell_limit", "sell_stop"
         (open_price - close_price) * base_lot_size * lot_size
       when "balance"
         close_price
-      end
+      end.exchange_to(account_currency).round
     end
   end
 
@@ -63,14 +69,31 @@ class Order < ApplicationRecord
     end
   end
 
+  def cost
+    Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f ) if prices_currency != account_currency
+    (lot_size * base_lot_size * open_price / account.leverage.to_f).exchange_to(account_currency).round
+  end
+
+  def prices_currency
+    if specification.present?
+      specification.orders_currency
+    else
+      :USD
+    end
+  end
+
   private
 
   def specification
-    @specification ||= Specification.where(symbol: symbol).first
+    @specification ||= Specification.find_by(symbol: symbol)
   end
 
   def base_lot_size
     @base_lot_size ||= specification.lot_size
+  end
+
+  def account_currency
+    @account_currency ||= account.currency
   end
 
 end

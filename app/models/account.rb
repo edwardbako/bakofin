@@ -6,14 +6,55 @@
 #   * server
 #   * balance
 #   * current_margin
+#
+# It could retrieve data from Redis. Requires Redis to store data in hash format with key:
+#
+#   "account:#{id}:data"
+#
+# Also could fetch list of orders. Order should be stored in format:
+#
+#   "ticket|type|magic|lots|symbol|open_time(rfc3339)|open_price|stop_loss|take_profit|close_time(rfc3339)|close_price|profit|swap|commission|expiration|comment"
+#
 class Account < ApplicationRecord
+  include Redis::Objects
+  hash_key :data
+  hash_key :orders_data
 
-  has_secure_password
   has_many :orders
   belongs_to :test_pass, optional: true
 
+  def load_from_redis
+    parse_data
+    save
+  end
+
+  def load_orders_from_redis
+    orders_data.keys.each { |key| parse_order(orders_data[key]) }
+  end
+
+  def load_data_and_orders_from_redis
+    load_from_redis
+    load_orders_from_redis
+  end
+
   def balance
     orders.closed.sum(&:profit)
+  end
+
+  def equity
+    balance + orders.opened.sum(&:profit)
+  end
+
+  def margin
+    orders.opened.sum(&:cost)
+  end
+
+  def free_margin
+    equity - margin
+  end
+
+  def free_margin_percent
+    equity.to_f / margin.to_f * 100
   end
 
   def starting_balance
@@ -285,4 +326,40 @@ class Account < ApplicationRecord
   def format
     {format: '%u %n', thousands_separator: " "}
   end
+
+  def parse_data
+    data.keys.each do |key|
+      self.send("#{key}=", data[key].gsub("\\", "\s"))
+    end
+  end
+
+  def parse_order(str)
+    data = str.split('|')
+
+    o = orders.find_or_create_by(id: data[0], symbol: data[4])
+    currency = o.prices_currency
+    o.update(kind: data[1].to_i,
+             magic_number: data[2],
+             lot_size: data[3].to_f,
+             open_date: Time.rfc3339(data[5]),
+             open_price: prepare_money(data[6], currency),
+             stop_loss: prepare_money(data[7], currency),
+             take_profit: prepare_money(data[8], currency),
+             close_date: early_date(Time.rfc3339(data[9])),
+             close_price: data[1].to_i == 6 ? prepare_money(data[11], currency) : prepare_money(data[10], currency),
+             profit: prepare_money(data[11], self.currency),
+             swap: prepare_money(data[12], self.currency),
+             commission: prepare_money(data[13], self.currency),
+             expiration: data[14] != '0' ? Time.rfc3339(data[14]) : Time.new(0),
+             comment: data[15])
+  end
+
+  def early_date(date)
+    date if date > (Time.now - 40.years)
+  end
+
+  def prepare_money(data, currency)
+    Money.new(data.to_f * 100, currency)
+  end
+
 end
