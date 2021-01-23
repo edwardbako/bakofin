@@ -46,14 +46,14 @@ class Account < ApplicationRecord
   end
 
   def margin
-    orders.opened.sum(&:cost)
+    orders.opened.sum(&:margin)
   end
 
   def free_margin
     equity - margin
   end
 
-  def free_margin_percent
+  def level
     equity.to_f / margin.to_f * 100
   end
 

@@ -3,6 +3,9 @@
 # Retrieving quotes data from Redis. Requires Redis to store list in the following format:
 #
 #   "yyyy-mm-ddThh:mm:ss+00:00|open|high|low|close|volume"
+#   key: "series:#{symbol}:#{timeframe}"
+#
+
 
 class Series
   include ActiveModel::Model
