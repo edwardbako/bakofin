@@ -69,7 +69,7 @@ class Order < ApplicationRecord
     end
   end
 
-  def cost
+  def margin
     Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f ) if prices_currency != account_currency
     (lot_size * base_lot_size * open_price / account.leverage.to_f).exchange_to(account_currency).round
   end
@@ -80,6 +80,10 @@ class Order < ApplicationRecord
     else
       :USD
     end
+  end
+
+  def reward_to_risk_ratio
+    profit / specification.stoploss_cost(lot_size)
   end
 
   private
