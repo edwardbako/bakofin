@@ -66,6 +66,11 @@ class Account < ApplicationRecord
     @history ||= orders.closed.order(:close_date).map { |o| (balance += o.profit).to_s }
   end
 
+  def history_by_date
+    balance = 0
+    @history_wo ||= orders.closed.order(:close_date).map { |o| [o.open_date, o.close_date, (balance += o.profit).to_s ]}
+  end
+
   def net_profit
     deals.sum(&:profit)
   end

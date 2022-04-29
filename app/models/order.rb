@@ -17,7 +17,12 @@
 #   * Magic number
 #   * Expiration
 class Order < ApplicationRecord
+  include Loggable
 
+  def initialize(attributes = {})
+    super
+    @logger = attributes[:logger]
+  end
 
   enum kind: [:buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance]
 
@@ -49,18 +54,17 @@ class Order < ApplicationRecord
   end
 
   def profit
-    if close_price.present?
-      Money.add_rate(prices_currency, account_currency, 1 / close_price.to_f) if prices_currency != account_currency
+    current_close_price = closed? ? close_price : Money.new(specification.close_price_by_kind(kind) * 100, prices_currency)
+    Money.add_rate(prices_currency, account_currency, 1 / current_close_price.to_f) if prices_currency.to_sym != account_currency.to_sym
 
-      case kind
-      when "buy", "buy_limit", "buy_stop"
-        (close_price - open_price) * base_lot_size * lot_size
-      when "sell", "sell_limit", "sell_stop"
-        (open_price - close_price) * base_lot_size * lot_size
-      when "balance"
-        close_price
-      end.exchange_to(account_currency).round
-    end
+    case kind
+    when "buy", "buy_limit", "buy_stop"
+      (current_close_price - open_price) * base_lot_size * lot_size
+    when "sell", "sell_limit", "sell_stop"
+      (open_price - current_close_price) * base_lot_size * lot_size
+    when "balance"
+      current_close_price
+    end.exchange_to(account_currency).round
   end
 
   def retention_time
@@ -70,7 +74,7 @@ class Order < ApplicationRecord
   end
 
   def margin
-    Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f ) if prices_currency != account_currency
+    Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f ) if prices_currency.to_sym != account_currency.to_sym
     (lot_size * base_lot_size * open_price / account.leverage.to_f).exchange_to(account_currency).round
   end
 
@@ -89,7 +93,11 @@ class Order < ApplicationRecord
   private
 
   def specification
-    @specification ||= Specification.find_by(symbol: symbol)
+    @specification ||= begin
+                         sp = Specification.find_by(symbol: symbol)
+                         sp.test = test if sp.present?
+                         sp
+                       end
   end
 
   def base_lot_size
@@ -97,7 +105,7 @@ class Order < ApplicationRecord
   end
 
   def account_currency
-    @account_currency ||= account.currency
+    @account_currency ||= account.present? ? account.currency : :USD
   end
 
 end

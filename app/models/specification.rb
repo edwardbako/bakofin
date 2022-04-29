@@ -20,6 +20,8 @@ class Specification < ApplicationRecord
   class Error < StandardError; end
   class NoDataError < Error; end
 
+  attr_accessor :test
+
   def pips(lot)
     (lot_size * lot * point) / rate_for_base
   end
@@ -87,7 +89,7 @@ class Specification < ApplicationRecord
   private
 
   def get(key)
-    response = $redis.get("#{symbol}:#{key}")
+    response = $redis.get("#{symbol}:#{key}#{test ? ":test" : ''}")
     raise NoDataError, "There is no market data for :#{symbol} symbol." if response.blank?
     response
   end

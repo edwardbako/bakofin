@@ -11,6 +11,7 @@ class Series
   include ActiveModel::Model
   include Redis::Objects
   # include Enumerable
+  include Loggable
 
   class Error < StandardError; end
   class RecordInvalid < Error; end
@@ -18,6 +19,7 @@ class Series
 
   def initialize(attributes={})
     super
+    @logger = attributes[:logger]
     raise RecordInvalid, errors.full_messages.join(', ') unless valid?
   end
 
@@ -54,7 +56,10 @@ class Series
   alias_method :current, :last
 
   def specification
-    Specification.where(symbol: symbol).first
+    specification = Specification.where(symbol: symbol).first
+    # raise NoDataError, "There is no specification for #{symbol} symbol."
+    specification.test = test
+    specification
   end
 
   def digits

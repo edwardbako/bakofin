@@ -4,13 +4,13 @@
 # It could use information of quotes series and indicators at given position of time.
 class Strategy
 
+  include Loggable
+
   attr_accessor :series,
                 :ma_period,
                 :bands_period, :bands_deviation, :bands_ma_method, :bands_price,
                 :sar_step, :sar_max,
                 :mfib_period, :mfib_bands_priod, :mfib_bands_deviation
-
-
 
   def initialize(**args)
     args.reverse_merge! defaults
@@ -21,6 +21,7 @@ class Strategy
   end
 
   def signal(*args)
+    logger.debug(prog_name) { "Performing calculations on current quote: #{series.current.inspect}"}
     # raise NotImplementedError, 'This method is from Strategy class. Implement it in subclass at wish.'
     calculations
   rescue  Series::NoDataError
