@@ -69,7 +69,7 @@ Specification.create(
 Specification.create(
   symbol: :BTCUSD,
   precision: 3,
-  stop_loss_level: 0,
+  stoploss_level: 0,
   lot_size: 1,
   margin_currency: "USD",
   orders_currency: "USD",
