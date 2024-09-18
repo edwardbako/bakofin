@@ -6,52 +6,52 @@ git_source(:github) do |repo_name|
 end
 
 
-gem 'rails', '~> 6.0.0'
+gem 'rails', '~> 7.2.0'
 gem 'pg' # Use postgresql as the database for Active Record
 gem 'pg_search' # builds ActiveRecord named scopes that take advantage of PostgreSQL’s full text search
 gem 'puma' # Use Puma as the app server
-gem 'will_paginate' # Pagination library
-gem 'will_paginate-bootstrap' # Bootstrap styles for pagination links
-# gem 'dynamic_sitemaps'
 
 gem 'russian' # I18n
 
-gem 'sass-rails', '~> 5.0' # Use SCSS for stylesheets
-gem 'slim-rails' # Slim markup for templates
-gem 'bootstrap-sass' # Bootstrap stylesheets
-gem 'font-awesome-rails' # Font-awesome icons
-# gem 'ionicons-rails' # Ion icons
-# gem 'material_icons' # Material icons
-
-gem 'uglifier', '>= 1.3.0' # Use Uglifier as compressor for JavaScript assets
-gem 'coffee-rails', '~> 4.2' # Use CoffeeScript for .coffee assets and views
+# gem 'uglifier', '>= 1.3.0' # Use Uglifier as compressor for JavaScript assets
+# gem 'coffee-rails', '~> 4.2' # Use CoffeeScript for .coffee assets and views
 
 # See https://github.com/rails/execjs#readme for more supported runtimes
-gem 'therubyracer', platforms: :ruby
+# gem 'therubyracer', platforms: :ruby
 
-gem 'jquery-rails' # Use jquery as the JavaScript library
-gem 'jquery-ui-rails'
-# gem 'jquery-fileupload-rails'
+# The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
+gem "sprockets-rails"
 
-gem 'turbolinks', '~> 5' # Turbolinks makes navigating your web application faster.
-gem 'jbuilder', '~> 2.5' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
+# Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
+gem "importmap-rails"
 
-# gem 'trix' # Trix WYSIWYG editor
+# Hotwire's SPA-like page accelerator [https://turbo.hotwired.dev]
+gem "turbo-rails"
+
+# Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
+gem "stimulus-rails"
+
+# Bundle and process CSS [https://github.com/rails/cssbundling-rails]
+gem "cssbundling-rails"
+
+gem 'slim-rails' # Slim markup for templates
+
+gem 'jbuilder' # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 
 gem 'redis'
 gem 'hiredis'
 gem 'redis-objects', github: "edwardbako/redis-objects", branch: "map_option" # Map Redis types directly to Ruby objects
 gem 'sidekiq' # Queueing framework
 gem 'sidekiq-cron' # Cron jobs for queueing
-gem 'sinatra', :require => nil
+# gem 'sinatra', :require => nil
 
 gem 'bcrypt' # Use ActiveModel has_secure_password
 gem 'devise' # Rack authentication
 
 gem 'money-rails'
 
-# gem 'carrierwave' # solution for file uploads
-# gem 'mini_magick'# A ruby wrapper for ImageMagick
+# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
+gem "image_processing"
 
 gem 'exception_notification'
 
@@ -71,21 +71,22 @@ end
 
 group :development do
   # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
-  gem 'web-console', '>= 3.3.0'
-  gem 'listen', '~> 3.0.5'
+  gem 'web-console'
+  gem 'listen'
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-  gem 'spring'
-  gem 'spring-watcher-listen', '~> 2.0.0'
+  # gem 'spring'
 
   gem 'letter_opener' # Open emails in browser
 
-  gem 'capistrano', '3.6.0' # Deploy automation tool
+  gem 'capistrano'
   gem 'capistrano-rails'
   # gem 'capistrano-rvm'
   gem 'capistrano-rbenv'
   gem 'capistrano-bundler'
+  gem 'capistrano-nodenv'
+  gem 'capistrano-yarn'
   gem 'capistrano-sidekiq'
-  gem 'capistrano3-puma', require: false
+  gem 'capistrano3-puma', github: "seuros/capistrano-puma"
 
   gem 'memory_profiler'
 end

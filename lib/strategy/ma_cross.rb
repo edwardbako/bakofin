@@ -1,4 +1,4 @@
-class Strategy::MACross < Strategy
+class Strategy::MaCross < Strategy
 
   attr_accessor :ma_period
 

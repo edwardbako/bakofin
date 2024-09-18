@@ -51,7 +51,7 @@ class Indicator
       instance_variable_set "@#{key}", value
     end
     raise Indicator::BlankSeriesError if series.blank?
-    post_initialize(args)
+    post_initialize(**args)
   end
 
   def [](index)
@@ -71,7 +71,7 @@ class Indicator
 
   private
 
-  def post_initialize(args)
+  def post_initialize(...)
     nil
   end
 

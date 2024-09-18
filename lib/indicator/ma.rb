@@ -25,7 +25,7 @@ class Indicator::Ma < Indicator
 
   private
 
-  def post_initialize(**args)
+  def post_initialize(...)
     raise IncorrectMethodError, "Don't know how to calculate :#{method} method. " unless self.respond_to?(method, true)
   end
 
