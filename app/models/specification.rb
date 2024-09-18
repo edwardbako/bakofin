@@ -16,7 +16,6 @@
 #   * Long positions swap
 
 class Specification < ApplicationRecord
-
   class Error < StandardError; end
   class NoDataError < Error; end
 
@@ -114,7 +113,6 @@ class Specification < ApplicationRecord
   end
 
   def lot_size_step_digits
-    lot_size_step.to_s.split('.')[1].size
+    lot_size_step.to_s.split(".")[1].size
   end
-
 end

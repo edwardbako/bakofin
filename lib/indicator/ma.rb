@@ -14,7 +14,6 @@
 #
 
 class Indicator::Ma < Indicator
-
   attr_reader :method, :price
 
   class IncorrectMethodError < Indicator::Error
@@ -34,9 +33,9 @@ class Indicator::Ma < Indicator
   end
 
   def local_defaults
-    {period: 20,
+    { period: 20,
      method: :sma,
-     price: :typical}
+     price: :typical }
   end
 
   def sma
@@ -146,5 +145,4 @@ class Indicator::Ma < Indicator
             main: value.round(digits)
     )
   end
-
 end

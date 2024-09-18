@@ -54,7 +54,7 @@ class TestPass < ApplicationRecord
           logger: logger,
           profit: STARTING_BALANCE
       )
-      logger.info(prog_name) { "Initial accout balance is #{account.balance}"}
+      logger.info(prog_name) { "Initial accout balance is #{account.balance}" }
     end
   end
 end

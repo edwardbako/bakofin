@@ -1,4 +1,4 @@
-require 'csv'
+require "csv"
 
 
 # == QuotesLoader
@@ -11,15 +11,15 @@ class QuotesLoader
   class Error < StandardError; end
   class NoDataError < Error; end
 
-  SUPPORTED_EXTENSIONS = ['csv']
-  PATH = Rails.root.join 'data'
-  FILES = %w(XAUUSD1.csv XAUUSD5.csv XAUUSD15.csv XAUUSD30.csv XAUUSD60.csv
-             XAUUSD240.csv XAUUSD1440.csv)
+  SUPPORTED_EXTENSIONS = [ "csv" ]
+  PATH = Rails.root.join "data"
+  FILES = %w[XAUUSD1.csv XAUUSD5.csv XAUUSD15.csv XAUUSD30.csv XAUUSD60.csv
+             XAUUSD240.csv XAUUSD1440.csv]
   TIMEZONE = "+03:00"
 
   attr_accessor :path, :filename, :symbol, :timeframe, :test
 
-  def initialize(path: PATH, symbol: nil, timeframe: nil, test:false, logger: nil)
+  def initialize(path: PATH, symbol: nil, timeframe: nil, test: false, logger: nil)
     @path = path
     @symbol = symbol
     @timeframe = timeframe
@@ -56,7 +56,7 @@ class QuotesLoader
   end
 
   def load_to_redis
-    logger.info(prog_name) { "Loading to Redis has started..."}
+    logger.info(prog_name) { "Loading to Redis has started..." }
     clear_redis
 
     i = 0
@@ -67,13 +67,13 @@ class QuotesLoader
       $redis.set redis_bid_key, bid(q)
       logger.debug(prog_name) { "Loaded #{formatted_quote(q)}" }
       logger.debug(prog_name) { "Ask set to #{ask(q)}" }
-      logger.debug(prog_name) { "Bid set to #{bid(q)}"}
+      logger.debug(prog_name) { "Bid set to #{bid(q)}" }
       i += 1
       yield i, size if block_given?
        "\rProcessed #{i} / #{size} bars"
     end
     puts "\n\n"
-    logger.debug(prog_name) { "Loaded #{size} bars."}
+    logger.debug(prog_name) { "Loaded #{size} bars." }
   ensure
     clear_redis
   end
@@ -89,9 +89,9 @@ class QuotesLoader
 
   def clear_redis
     if test
-      logger.debug(prog_name) { "Clearing redis key -- #{redis_key}: #{$redis.del(redis_key)}"}
-      logger.debug(prog_name) { "Clearing redis key -- #{redis_ask_key}: #{$redis.del(redis_ask_key)}"}
-      logger.debug(prog_name) { "Clearing redis key -- #{redis_bid_key}: #{$redis.del(redis_bid_key)}"}
+      logger.debug(prog_name) { "Clearing redis key -- #{redis_key}: #{$redis.del(redis_key)}" }
+      logger.debug(prog_name) { "Clearing redis key -- #{redis_ask_key}: #{$redis.del(redis_ask_key)}" }
+      logger.debug(prog_name) { "Clearing redis key -- #{redis_bid_key}: #{$redis.del(redis_bid_key)}" }
     end
   end
 
@@ -106,14 +106,14 @@ class QuotesLoader
   # end
 
   def test_key_ext
-    test ? ':test' : ''
+    test ? ":test" : ""
   end
 
   def readfile
     # self.symbol = filename_parsed[0]
     # self.timeframe = filename_parsed[1].to_i
     file = File.join(path, filename)
-    logger.debug(prog_name) { "Reading file: #{file}"}
+    logger.debug(prog_name) { "Reading file: #{file}" }
     unless File.exist? file
       raise NoDataError, "There is no data for symbol #{symbol} on timeframe #{timeframe}"
     end
@@ -121,14 +121,14 @@ class QuotesLoader
   end
 
   def formatted_quote(q)
-    "#{q[0].gsub('.','-')}T#{q[1]}:00#{TIMEZONE}|#{q[2]}|#{q[3]}|#{q[4]}|#{q[5]}|#{q[6]}"
+    "#{q[0].gsub('.', '-')}T#{q[1]}:00#{TIMEZONE}|#{q[2]}|#{q[3]}|#{q[4]}|#{q[5]}|#{q[6]}"
   end
 
   def ask(q)
-    [q[2], q[5]].max
+    [ q[2], q[5] ].max
   end
 
   def bid(q)
-    [q[2], q[5]].min
+    [ q[2], q[5] ].min
   end
 end

@@ -6,7 +6,6 @@
 #   * period
 #
 class Indicator::Sar < Indicator
-
   attr_reader :step, :max
 
   private
@@ -36,7 +35,7 @@ class Indicator::Sar < Indicator
           af += step if af < max
         end
         sar = sar + af * (ep - sar)
-        sar = [ sar, series[i+1].low, series[i+2].low].min
+        sar = [ sar, series[i+1].low, series[i+2].low ].min
 
         if q.low < sar
           sar = ep
@@ -51,7 +50,7 @@ class Indicator::Sar < Indicator
           af += step if af < max
         end
         sar = sar + af * (ep - sar)
-        sar = [ sar, series[i+1].high, series[i+2].high].max
+        sar = [ sar, series[i+1].high, series[i+2].high ].max
 
         if q.high > sar
           sar = ep
@@ -73,5 +72,4 @@ class Indicator::Sar < Indicator
     new_bar(time: series[index].time,
             main: value.round(digits))
   end
-
 end

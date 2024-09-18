@@ -13,9 +13,8 @@
 #
 
 class Indicator
-
   class Error < StandardError
-    def initialize(msg=nil)
+    def initialize(msg = nil)
       @message = msg
     end
 
@@ -26,7 +25,7 @@ class Indicator
 
   class BlankSeriesError < Error
     def message
-      super + 'You have no provided series object. '
+      super + "You have no provided series object. "
     end
   end
 
@@ -80,7 +79,7 @@ class Indicator
   end
 
   def defaults
-    {series: nil, period: 0, shift: 0}.merge! local_defaults
+    { series: nil, period: 0, shift: 0 }.merge! local_defaults
   end
 
   def local_defaults
@@ -103,16 +102,14 @@ class Indicator
 
 
   def start
-    ( range.is_a?(Range) ? range.last + period : range + period ) + shift if range.present?
+    (range.is_a?(Range) ? range.last + period : range + period) + shift if range.present?
   end
 
   def stop
-    ( range.is_a?(Range) ? range.first : range ) + shift if range.present?
+    (range.is_a?(Range) ? range.first : range) + shift if range.present?
   end
 
   def size
     start - stop - period + 1
   end
-
-
 end

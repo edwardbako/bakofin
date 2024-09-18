@@ -17,10 +17,10 @@ class Series
   class RecordInvalid < Error; end
   class NoDataError < Error; end
 
-  def initialize(attributes={})
+  def initialize(attributes = {})
     super
     @logger = attributes[:logger]
-    raise RecordInvalid, errors.full_messages.join(', ') unless valid?
+    raise RecordInvalid, errors.full_messages.join(", ") unless valid?
   end
 
   attr_accessor :symbol, :timeframe, :test
@@ -41,7 +41,7 @@ class Series
     if index.is_a? Integer
       parse_quote data[index]
     else
-      data[index].map {|q| parse_quote q}
+      data[index].map { |q| parse_quote q }
     end
   end
 
@@ -68,22 +68,22 @@ class Series
 
   def index_by(**params)
     unless params.key?(:time)
-      raise NotImplementedError, "Object of class #{self.class.to_s} searches index only by time field."
+      raise NotImplementedError, "Object of class #{self.class} searches index only by time field."
     end
     i = 0
     all.each do |q|
-      break if q.time < params[:time] #TODO What if date not found?
+      break if q.time < params[:time] # TODO What if date not found?
       i += 1
     end
     i
   end
 
   def all
-    data.map {|q| parse_quote q}
+    data.map { |q| parse_quote q }
   end
 
   private_class_method def self._indicators_list
-    Dir.entries("lib/indicator")[2..-1].map {|x| File.basename(x, ".rb").camelize }
+    Dir.entries("lib/indicator")[2..-1].map { |x| File.basename(x, ".rb").camelize }
   end
 
   _indicators_list.each do |m|
@@ -100,7 +100,7 @@ class Series
       raise NoDataError, "There is no data available for #{symbol} symbol on #{timeframe} timeframe"
     end
 
-    data = str.split('|')
+    data = str.split("|")
     Quote.new time: Time.rfc3339(data[0]),
               open: data[1].to_f,
               high: data[2].to_f,
@@ -108,6 +108,4 @@ class Series
               close: data[4].to_f,
               volume: data[5].to_i
   end
-
-
 end

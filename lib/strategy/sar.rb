@@ -1,7 +1,6 @@
 # == Strategy on SAR
 #
 class Strategy::Sar < Strategy
-
   private
 
   def calculations
@@ -26,5 +25,4 @@ class Strategy::Sar < Strategy
         sar_max: 0.2
     }
   end
-
 end

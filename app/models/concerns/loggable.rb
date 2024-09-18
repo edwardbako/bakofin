@@ -1,5 +1,4 @@
 module Loggable
-
   extend ActiveSupport::Concern
 
   attr_accessor :logger

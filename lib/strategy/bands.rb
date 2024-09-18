@@ -1,5 +1,4 @@
 class Strategy::Bands < Strategy
-
   attr_accessor :enter_limit
 
   private
@@ -20,7 +19,7 @@ class Strategy::Bands < Strategy
   end
 
   def defaults
-    {bands_period: 20,
+    { bands_period: 20,
      bands_deviation: 3.2,
      bands_ma_method: :ema,
      bands_price: :typical,
@@ -32,5 +31,4 @@ class Strategy::Bands < Strategy
      enter_limit: 10
     }
   end
-
 end

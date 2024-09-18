@@ -1,12 +1,11 @@
 class TicksController < ApplicationController
-
   skip_before_action :verify_authenticity_token
 
   before_action :verify_request_ip
 
   def index
     respond_to do |format|
-      format.json {render json: {action: :buy}, status: :ok}
+      format.json { render json: { action: :buy }, status: :ok }
     end
   end
 
@@ -14,7 +13,7 @@ class TicksController < ApplicationController
     log_data
 
     respond_to do |format|
-      format.json {render json: {data: :completed}, status: :ok}
+      format.json { render json: { data: :completed }, status: :ok }
     end
   end
 
@@ -27,7 +26,7 @@ class TicksController < ApplicationController
   end
 
   def alowed_params
-    [:bid, :ask, :symbol, :timeframe, :time, :volume]
+    [ :bid, :ask, :symbol, :timeframe, :time, :volume ]
   end
 
   def tick_params
@@ -36,8 +35,7 @@ class TicksController < ApplicationController
 
   def verify_request_ip
     unless Rails.application.secrets[:ip_whitelist].include? request.remote_ip
-      render plain: 'Not Authorized', status: :unauthorized
+      render plain: "Not Authorized", status: :unauthorized
     end
   end
-
 end

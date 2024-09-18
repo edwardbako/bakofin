@@ -68,7 +68,7 @@ class Account < ApplicationRecord
 
   def history_by_date
     balance = 0
-    @history_wo ||= orders.closed.order(:close_date).map { |o| [o.open_date, o.close_date, (balance += o.profit).to_s ]}
+    @history_wo ||= orders.closed.order(:close_date).map { |o| [ o.open_date, o.close_date, (balance += o.profit).to_s ] }
   end
 
   def net_profit
@@ -96,7 +96,7 @@ class Account < ApplicationRecord
   end
 
   def profitable_deals
-    deals.select {|o| o.profit > 0 }
+    deals.select { |o| o.profit > 0 }
   end
 
   def profitable_deals_percentage
@@ -104,7 +104,7 @@ class Account < ApplicationRecord
   end
 
   def loss_deals
-    deals.select {|o| o.profit <= 0 }
+    deals.select { |o| o.profit <= 0 }
   end
 
   def loss_deals_percentage
@@ -112,11 +112,11 @@ class Account < ApplicationRecord
   end
 
   def best_profitable_deal
-    profitable_deals.max { |a,b| a.profit <=> b.profit }
+    profitable_deals.max { |a, b| a.profit <=> b.profit }
   end
 
   def worst_loss_deal
-    loss_deals.min { |a,b,| a.profit <=> b.profit }
+    loss_deals.min { |a, b,| a.profit <=> b.profit }
   end
 
   def profit_per_deal
@@ -150,28 +150,28 @@ class Account < ApplicationRecord
   end
 
   def continuous_win_by_count
-    continuous.select {|e| e.sum > 0}.max_by(&:count)
+    continuous.select { |e| e.sum > 0 }.max_by(&:count)
   end
 
   def continuous_win_by_profit
-    continuous.select {|e| e.sum > 0}.max_by(&:sum)
+    continuous.select { |e| e.sum > 0 }.max_by(&:sum)
   end
 
   def continuous_loss_by_count
-    continuous.select {|e| e.sum < 0}.max_by(&:count)
+    continuous.select { |e| e.sum < 0 }.max_by(&:count)
   end
 
   def continuous_loss_by_loss
-    continuous.select {|e| e.sum < 0}.min_by(&:sum)
+    continuous.select { |e| e.sum < 0 }.min_by(&:sum)
   end
 
   def mid_continuous_win_count
-    c = continuous.select {|e| e.sum > 0}
+    c = continuous.select { |e| e.sum > 0 }
     (c.map(&:count).sum / c.size.to_f).round(1)
   end
 
   def mid_continuous_loss_count
-    c = continuous.select {|e| e.sum < 0}
+    c = continuous.select { |e| e.sum < 0 }
     (c.map(&:count).sum / c.size.to_f).round(1)
   end
 
@@ -215,7 +215,7 @@ class Account < ApplicationRecord
     # Standard Deviation
     sd = Math.sqrt(sum / hpr.size).round(5)
 
-    {hpr: hpr, ahpr: ahpr, sd: sd}
+    { hpr: hpr, ahpr: ahpr, sd: sd }
   end
 
   def sharpe_ratio(risk_free_rate = 0)
@@ -329,7 +329,7 @@ class Account < ApplicationRecord
   private
 
   def format
-    {format: '%u %n', thousands_separator: " "}
+    { format: "%u %n", thousands_separator: " " }
   end
 
   def parse_data
@@ -339,7 +339,7 @@ class Account < ApplicationRecord
   end
 
   def parse_order(str)
-    data = str.split('|')
+    data = str.split("|")
 
     o = orders.find_or_create_by(id: data[0], symbol: data[4])
     currency = o.prices_currency
@@ -355,7 +355,7 @@ class Account < ApplicationRecord
              profit: prepare_money(data[11], self.currency),
              swap: prepare_money(data[12], self.currency),
              commission: prepare_money(data[13], self.currency),
-             expiration: data[14] != '0' ? Time.rfc3339(data[14]) : Time.new(0),
+             expiration: data[14] != "0" ? Time.rfc3339(data[14]) : Time.new(0),
              comment: data[15])
   end
 
@@ -366,5 +366,4 @@ class Account < ApplicationRecord
   def prepare_money(data, currency)
     Money.new(data.to_f * 100, currency)
   end
-
 end

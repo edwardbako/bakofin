@@ -9,8 +9,8 @@ Rails.application.configure do
   # and those relying on copy on write to perform better.
   # Rake tasks automatically ignore this option for performance.
   config.eager_load = true
-  config.eager_load_paths += Dir[File.join(Rails.root, 'lib/**/'),
-                                 File.join(Rails.root, 'app/workers/**/')]
+  config.eager_load_paths += Dir[File.join(Rails.root, "lib/**/"),
+                                 File.join(Rails.root, "app/workers/**/")]
 
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false
@@ -23,7 +23,7 @@ Rails.application.configure do
 
   # Disable serving static files from the `/public` folder by default since
   # Apache or NGINX already handles this.
-  config.public_file_server.enabled = ENV['RAILS_SERVE_STATIC_FILES'].present?
+  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
   # Compress JavaScripts and CSS.
   config.assets.js_compressor = :uglifier
@@ -65,12 +65,12 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address:              'smtp.gmail.com',
+    address:              "smtp.gmail.com",
     port:                 587,
-    domain:               'bakofin.ru',
+    domain:               "bakofin.ru",
     user_name:            Rails.application.secrets.gmail[:username],
     password:             Rails.application.secrets.gmail[:password],
-    authentication:       'plain',
+    authentication:       "plain",
     enable_starttls_auto: true  }
 
   # Ignore bad email addresses and do not raise email delivery errors.
@@ -105,8 +105,8 @@ Rails.application.configure do
     email: {
       deliver_with: :deliver,
       email_prefix: "[Bakofin - #{Rails.env}] ",
-      sender_address: 'noreply@bakofin.ru',
-      exception_recipients: 'edward.bako@gmail.com'
+      sender_address: "noreply@bakofin.ru",
+      exception_recipients: "edward.bako@gmail.com"
     },
     # ignore_exceptions: [] + ExceptionNotifier.ignored_exceptions,
     error_grouping: true,
@@ -119,5 +119,4 @@ Rails.application.configure do
   #     count: accumulated errors count for this exception
 
   # notification_trigger: lambda { |exception, count| count % 10 == 0 }
-
 end

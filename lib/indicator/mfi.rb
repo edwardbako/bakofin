@@ -5,11 +5,10 @@
 #   * period
 #
 class Indicator::Mfi < Indicator
-
   private
 
   def local_defaults
-    {period: 14}
+    { period: 14 }
   end
 
   def calculations
@@ -58,5 +57,4 @@ class Indicator::Mfi < Indicator
 
     positive / negative
   end
-
 end

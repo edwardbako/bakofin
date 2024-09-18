@@ -1,7 +1,7 @@
 # require_relative '../strategy_tester'
 
-desc 'Run Strategy Tester for.'
-task :strategy_tester => :environment do
+desc "Run Strategy Tester for."
+task strategy_tester: :environment do
   puts "Starting rake task"
   ARGV.each { |a| task a.to_sym do ; end }
 
@@ -9,4 +9,3 @@ task :strategy_tester => :environment do
   t.run
   t.report
 end
-

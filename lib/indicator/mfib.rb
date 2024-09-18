@@ -8,7 +8,6 @@
 #   * ma_method
 #
 class Indicator::Mfib < Indicator
-
   attr_reader :bands_period, :bands_deviation, :ma_method
 
   private
@@ -23,7 +22,7 @@ class Indicator::Mfib < Indicator
   end
 
   def mfi
-    @mfi ||=  Indicator::Mfi.new(series: series, period: period )
+    @mfi ||=  Indicator::Mfi.new(series: series, period: period)
   end
 
   def bands
@@ -43,5 +42,4 @@ class Indicator::Mfib < Indicator
     end
     line
   end
-
 end

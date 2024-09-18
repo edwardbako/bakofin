@@ -3,7 +3,6 @@
 # Performs calculation of trading signals, such as *Open Buy Order*, *Close Sell Order* etc.
 # It could use information of quotes series and indicators at given position of time.
 class Strategy
-
   include Loggable
 
   attr_accessor :series,
@@ -17,11 +16,10 @@ class Strategy
     args.each do |key, value|
       instance_variable_set "@#{key}", value
     end
-
   end
 
   def signal(*args)
-    logger.debug(prog_name) { "Performing calculations on current quote: #{series.current.inspect}"}
+    logger.debug(prog_name) { "Performing calculations on current quote: #{series.current.inspect}" }
     # raise NotImplementedError, 'This method is from Strategy class. Implement it in subclass at wish.'
     calculations
   rescue  Series::NoDataError
@@ -69,6 +67,4 @@ class Strategy
   def ma200
     @ma200 ||= series.iMa(period: 200)
   end
-
-
 end

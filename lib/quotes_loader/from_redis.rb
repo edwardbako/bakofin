@@ -1,5 +1,4 @@
 class QuotesLoader::FromRedis
-
   attr_accessor :symbol, :timeframe, :quote, :channel
   def initialize(symbol = "XAUUSD", timeframe: 1)
     @symbol = Symb.find_by name: symbol
@@ -24,7 +23,7 @@ class QuotesLoader::FromRedis
 
   def load_history
     time = quote[:time] - 15.days
-    key = "#{symbol.name};#{timeframe};#{time.strftime("%Y-%-m-%-d-%k:")}#{time.min.to_s}+3"
+    key = "#{symbol.name};#{timeframe};#{time.strftime("%Y-%-m-%-d-%k:")}#{time.min}+3"
     r = $redis.mapped_hmget(time.strftime("%Y-%-m-%-d-%k:") + time.min.to_s,
                         :open, :high, :low, :close, :volume, :time)
     puts key
@@ -39,10 +38,8 @@ class QuotesLoader::FromRedis
   private
 
   def hashify_message(m)
-    result = JSON.parse(m).map {|k, v| [k, v.to_f]}.to_h.symbolize_keys
+    result = JSON.parse(m).map { |k, v| [ k, v.to_f ] }.to_h.symbolize_keys
     result[:time] = Time.at(result[:time] - 3*60*60).in_time_zone
     result
   end
-
-
 end

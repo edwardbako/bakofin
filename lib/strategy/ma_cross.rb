@@ -1,11 +1,10 @@
 class Strategy::MaCross < Strategy
-
   attr_accessor :ma_period
 
   private
 
   def defaults
-    {ma_period: 50}
+    { ma_period: 50 }
   end
 
   def calculations
@@ -20,5 +19,4 @@ class Strategy::MaCross < Strategy
       :none
     end
   end
-
 end

@@ -1,4 +1,4 @@
-require 'highline/import'
+require "highline/import"
 # == Strategy Tester
 #
 # The main task of strategy tester is to simulate ticks appearance of given time series.
@@ -29,8 +29,8 @@ class StrategyTester
   end
 
   def defaults
-    {strategy_class: nil, symbol: nil, timeframe: nil,
-      start_date: Time.now - 10.years, stop_date: Time.now}
+    { strategy_class: nil, symbol: nil, timeframe: nil,
+      start_date: Time.now - 10.years, stop_date: Time.now }
   end
 
   def run
@@ -47,7 +47,7 @@ class StrategyTester
     end
     pass.save
 
-    logger.info(prog_name) { "Test Pass #{pass.id} stop."}
+    logger.info(prog_name) { "Test Pass #{pass.id} stop." }
   end
 
   def report
@@ -55,7 +55,7 @@ class StrategyTester
   end
 
   def logger
-    @logger ||= Logger.new(File.join(Rails.root,"log/strategy_tester/#{Time.now.xmlschema}.log"))
+    @logger ||= Logger.new(File.join(Rails.root, "log/strategy_tester/#{Time.now.xmlschema}.log"))
   end
 
   def self.clear_logs
@@ -106,5 +106,4 @@ class StrategyTester
     pass.bars_processed = i
     trader.close_all_orders if i == size
   end
-
 end

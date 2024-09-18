@@ -1,4 +1,4 @@
-require 'matrix'
+require "matrix"
 # == Bollinger bands technical indicator
 #
 # Accepts arguments
@@ -9,7 +9,6 @@ require 'matrix'
 #   * price
 #
 class Indicator::Bands < Indicator
-
   attr_reader :deviations, :ma_method, :price
 
   class IncorrectMethodError < Indicator::Error
@@ -95,6 +94,4 @@ class Indicator::Bands < Indicator
   def percent_b(index, up, low)
     ((value(index) - low) / (up - low) * 100).round(digits)
   end
-
-
 end

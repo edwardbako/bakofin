@@ -24,7 +24,7 @@ class Order < ApplicationRecord
     @logger = attributes[:logger]
   end
 
-  enum kind: [:buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance]
+  enum kind: [ :buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance ]
 
   monetize :open_price_cents,
            :close_price_cents,
@@ -37,7 +37,7 @@ class Order < ApplicationRecord
   belongs_to :account
 
   scope :opened, -> { where(close_date: nil) }
-  scope :closed, -> { where.not(close_date: nil)}
+  scope :closed, -> { where.not(close_date: nil) }
 
   def opened?
     close_date.blank?
@@ -74,7 +74,7 @@ class Order < ApplicationRecord
   end
 
   def margin
-    Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f ) if prices_currency.to_sym != account_currency.to_sym
+    Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f) if prices_currency.to_sym != account_currency.to_sym
     (lot_size * base_lot_size * open_price / account.leverage.to_f).exchange_to(account_currency).round
   end
 
@@ -107,5 +107,4 @@ class Order < ApplicationRecord
   def account_currency
     @account_currency ||= account.present? ? account.currency : :USD
   end
-
 end

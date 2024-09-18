@@ -12,7 +12,6 @@ class Trader
     args.each do |key, value|
       instance_variable_set "@#{key}", value
     end
-
   end
 
   def defaults
@@ -40,26 +39,26 @@ class Trader
   private
 
   def open_buy
-    logger.debug(prog_name) { "OPEN BUY signal received."}
-    logger.debug(prog_name) { "Trying to close short orders."}
+    logger.debug(prog_name) { "OPEN BUY signal received." }
+    logger.debug(prog_name) { "Trying to close short orders." }
     close_sell
     open_order kind: :buy
   end
 
   def open_sell
-    logger.debug(prog_name) { "OPEN SELL signall received."}
-    logger.debug(prog_name) { "Trying to close long orders."}
+    logger.debug(prog_name) { "OPEN SELL signall received." }
+    logger.debug(prog_name) { "Trying to close long orders." }
     close_buy
     open_order kind: :sell
   end
 
   def close_buy
-    logger.debug(prog_name) { "CLOSE BUY signal received."}
+    logger.debug(prog_name) { "CLOSE BUY signal received." }
     close_orders kind: :buy
   end
 
   def close_sell
-    logger.debug(prog_name) { "CLOSE SELL signal received."}
+    logger.debug(prog_name) { "CLOSE SELL signal received." }
     close_orders kind: :sell
   end
 
@@ -71,7 +70,7 @@ class Trader
   def open_order(kind: nil)
     lot = lot_size(kind)
     if lot > 0 and orders.opened.count < max_opened_orders
-      logger.debug(prog_name) { "Trying to open new order..."}
+      logger.debug(prog_name) { "Trying to open new order..." }
       order = orders.create symbol: series.symbol,
                     kind: kind,
                     lot_size: lot,
@@ -86,14 +85,14 @@ class Trader
                     magic_number: magic_number,
                     logger: logger,
                     test: test
-      logger.debug(prog_name) { "New order created: #{order.attributes}"}
+      logger.debug(prog_name) { "New order created: #{order.attributes}" }
     end
   end
 
   def close_orders(kind: nil)
     orders.send(kind).opened.each do |o|
       o.close price: specification.close_price_by_kind(kind), date: series[0].time
-      logger.debug(prog_name) { "Order has been closed. #{o.inspect}"}
+      logger.debug(prog_name) { "Order has been closed. #{o.inspect}" }
     end
   end
 
@@ -111,9 +110,9 @@ class Trader
 
   def lot_size(kind)
     lbm, lbr = lot_by_margin(kind), lot_by_risk
-    logger.debug(prog_name) { "Lot by margin is #{lbm}"}
-    logger.debug(prog_name) { "Lot by risk is #{lbr}"}
-    [lbm, lbr].min
+    logger.debug(prog_name) { "Lot by margin is #{lbm}" }
+    logger.debug(prog_name) { "Lot by risk is #{lbr}" }
+    [ lbm, lbr ].min
   end
 
   def max_load

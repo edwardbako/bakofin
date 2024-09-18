@@ -5,7 +5,7 @@ class Quote
   attr_accessor :time, :open, :high, :low, :close, :volume
 
   def attributes
-    {time: nil, open: nil, high: nil, low: nil, close: nil, volume: nil}.stringify_keys
+    { time: nil, open: nil, high: nil, low: nil, close: nil, volume: nil }.stringify_keys
   end
 
   alias_method :y, :volume
@@ -38,5 +38,4 @@ class Quote
     ",\t close=" + "#{close}".magenta.bold +
     ",\t volume=" + "#{volume}".yellow.bold
   end
-
 end
