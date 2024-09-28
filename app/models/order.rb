@@ -24,7 +24,7 @@ class Order < ApplicationRecord
     @logger = attributes[:logger]
   end
 
-  enum kind: [ :buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance ]
+  enum :kind, [ :buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance ]
 
   monetize :open_price_cents,
            :close_price_cents,

@@ -83,7 +83,7 @@ class Series
   end
 
   private_class_method def self._indicators_list
-    Dir.entries("lib/indicator")[2..-1].map { |x| File.basename(x, ".rb").camelize }
+    Dir.entries("lib/indicator").sort[2..-1].map { |x| File.basename(x, ".rb").camelize }
   end
 
   _indicators_list.each do |m|

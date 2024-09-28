@@ -100,7 +100,7 @@ class Account < ApplicationRecord
   end
 
   def profitable_deals_percentage
-    (profitable_deals.count.to_f / deals.count * 100).to_s :percentage, precision: 1
+    (profitable_deals.count.to_f / deals.count * 100).to_fs :percentage, precision: 1
   end
 
   def loss_deals
@@ -108,7 +108,7 @@ class Account < ApplicationRecord
   end
 
   def loss_deals_percentage
-    (loss_deals.count.to_f / deals.count * 100).to_s :percentage, precision: 1
+    (loss_deals.count.to_f / deals.count * 100).to_fs :percentage, precision: 1
   end
 
   def best_profitable_deal
