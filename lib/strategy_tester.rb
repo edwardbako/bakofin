@@ -48,20 +48,12 @@ class StrategyTester
     pass.save
 
     logger.info(prog_name) { "Test Pass #{pass.id} stop." }
+    logger.close
   end
 
   def report
     pass.report
   end
-
-  def logger
-    @logger ||= Logger.new(File.join(Rails.root, "log/strategy_tester/#{Time.now.xmlschema}.log"))
-  end
-
-  def self.clear_logs
-    FileUtils.rm_rf(File.join(Rails.root, "log/strategy_tester/."))
-  end
-
 
   def series
     @series ||= ::Series.new symbol: symbol, timeframe: timeframe, test: true, logger: logger
@@ -102,7 +94,6 @@ class StrategyTester
     logger.debug(prog_name) { "Current account equity is #{account.equity}" }
     logger.debug(prog_name) { "Current account margin is #{account.margin}" }
 
-    # print "#{i} quotes processed. \r"
     pass.bars_processed = i
     trader.close_all_orders if i == size
   end
