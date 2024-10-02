@@ -76,11 +76,11 @@ class Account < ApplicationRecord
   end
 
   def total_profit
-    profitable_deals.sum(&:profit)
+    profitable_deals.sum(&:profit).to_money
   end
 
   def total_loss
-    loss_deals.sum(&:profit)
+    loss_deals.sum(&:profit).to_money
   end
 
   def buy_positions
@@ -120,16 +120,18 @@ class Account < ApplicationRecord
   end
 
   def profit_per_deal
-    total_profit / profitable_deals.count
+    count = profitable_deals.count
+    count > 0 ? total_profit / count : 0.to_money
   end
 
   def loss_per_deal
-    total_loss / loss_deals.count
+    count = loss_deals.count
+    count > 0 ? total_loss / count : 0.to_money
   end
 
   def continuous
     result = []
-    sum = 0
+    sum = 0.to_money
     count = 0
 
     deals.each do |o|
@@ -150,11 +152,11 @@ class Account < ApplicationRecord
   end
 
   def continuous_win_by_count
-    continuous.select { |e| e.sum > 0 }.max_by(&:count)
+    continuous.select { |e| e.sum >= 0 }.max_by(&:count)
   end
 
   def continuous_win_by_profit
-    continuous.select { |e| e.sum > 0 }.max_by(&:sum)
+    continuous.select { |e| e.sum >= 0 }.max_by(&:sum)
   end
 
   def continuous_loss_by_count
@@ -305,8 +307,8 @@ class Account < ApplicationRecord
       puts "Sell deals count \t\t" + "#{sell_positions.count}".bold
       puts "Profitable deals (% of all) \t" + "#{profitable_deals.count} (#{profitable_deals_percentage})".bold
       puts "Loss deals (% of all) \t\t" + "#{loss_deals.count} (#{loss_deals_percentage})".bold
-      puts "Best profitable deal \t\t" + "#{best_profitable_deal.profit.format(format)}".bold
-      puts "Worst loss deal \t\t" + "#{worst_loss_deal.profit.format(format)}".bold
+      puts "Best profitable deal \t\t" + "#{best_profitable_deal.profit.format(format) if best_profitable_deal.present?}".bold
+      puts "Worst loss deal \t\t" + "#{worst_loss_deal.profit.format(format) if worst_loss_deal.present?}".bold
       puts "Mid profit per deal \t\t" + "#{profit_per_deal.format(format)}".bold
       puts "Mid loss per deal \t\t" + "#{loss_per_deal.format(format)}".bold
       puts "Max continuous win by count \t" + "#{continuous_win_by_count.count} (#{continuous_win_by_count.sum.format(format)})".bold
