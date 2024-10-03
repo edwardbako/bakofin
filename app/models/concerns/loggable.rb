@@ -5,7 +5,13 @@ module Loggable
   attr_reader :filename
 
   def logger
-    @logger ||= Logger.new(log_filename)
+    @logger ||= begin
+                  logger = Logger.new(log_filename)
+                  logger.formatter = ->(severity, time, progname, message) do
+                    "#{severity} -- #{progname}: #{message}\n"
+                  end
+                  logger
+                end
   end
 
   def log
@@ -15,7 +21,7 @@ module Loggable
   private
 
   def log_filename
-    @filename ||= "#{prog_name}##{object_id}-#{Time.now.xmlschema}.log"
+    @filename ||= "#{Time.now.xmlschema}_#{prog_name}##{object_id}.log"
     File.join(logs_path, filename)
   end
 

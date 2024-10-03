@@ -34,6 +34,7 @@ class StrategyTester
   end
 
   def run
+    start = Time.now
     logger.info(prog_name) { "Test Pass #{pass.id} starting..." }
 
     loader.load_to_redis do |i, size|
@@ -47,7 +48,10 @@ class StrategyTester
     end
     pass.save
 
-    logger.info(prog_name) { "Test Pass #{pass.id} stop." }
+    duration = (Time.now - start).round
+    minutes = duration / 1.minute
+    seconds = duration - minutes * 60.seconds
+    logger.info(prog_name) { "Test Pass #{pass.id} stopped. It took #{minutes}m #{seconds}s to run test." }
     logger.close
   end
 
