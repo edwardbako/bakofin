@@ -9,6 +9,7 @@
 /.bundle
 
 .idea
+.zed
 
 # Ignore all logfiles and tempfiles.
 /log/*
