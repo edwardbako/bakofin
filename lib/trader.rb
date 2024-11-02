@@ -74,7 +74,7 @@ class Trader
       order = orders.create symbol: series.symbol,
                     kind: kind,
                     lot_size: lot,
-                    open_date: series[0].time,
+                    open_date: series.current.time,
                     open_price: specification.open_price_by_kind(kind),
                     close_price: specification.close_price_by_kind(kind),
                     stop_loss: stop_loss(kind),
@@ -91,7 +91,7 @@ class Trader
 
   def close_orders(kind: nil)
     orders.send(kind).opened.each do |o|
-      o.close price: specification.close_price_by_kind(kind), date: series[0].time
+      o.close date: series.current.time
       logger.debug(prog_name) { "Order has been closed. #{o.inspect}" }
     end
   end

@@ -19,12 +19,7 @@
 class Order < ApplicationRecord
   include Loggable
 
-  def initialize(attributes = {})
-    super
-    @logger = attributes[:logger]
-  end
-
-  enum :kind, [ :buy, :sell, :buy_limit, :sell_limit, :buy_stop, :sell_stop, :balance ]
+  enum :kind, %i[buy sell buy_limit sell_limit buy_stop sell_stop balance]
 
   monetize :open_price_cents,
            :close_price_cents,
@@ -39,6 +34,14 @@ class Order < ApplicationRecord
   scope :opened, -> { where(close_date: nil) }
   scope :closed, -> { where.not(close_date: nil) }
 
+  def logger
+    if account.present?
+      @logger ||= account.logger
+    else
+      super
+    end
+  end
+
   def opened?
     close_date.blank?
   end
@@ -47,34 +50,39 @@ class Order < ApplicationRecord
     close_date.present?
   end
 
-  def close(price: nil, date: nil)
+  def close(price: current_close_price, date: Time.current)
     self.close_price = price
     self.close_date = date
+    logger.debug(prog_name) { "Closing order ##{id}-#{kind}. Profit: #{profit}." }
     save
   end
 
   def profit
-    current_close_price = closed? ? close_price : Money.new(specification.close_price_by_kind(kind) * 100, prices_currency)
-    Money.add_rate(prices_currency, account_currency, 1 / current_close_price.to_f) if prices_currency.to_sym != account_currency.to_sym
+    @current_close_price = current_close_price
+    if prices_currency.to_sym != account_currency.to_sym
+      Money.add_rate(prices_currency, account_currency, 1 / @current_close_price.to_f)
+    end
 
     case kind
     when "buy", "buy_limit", "buy_stop"
-      (current_close_price - open_price) * base_lot_size * lot_size
+      (@current_close_price - open_price) * base_lot_size * lot_size
     when "sell", "sell_limit", "sell_stop"
-      (open_price - current_close_price) * base_lot_size * lot_size
+      (open_price - @current_close_price) * base_lot_size * lot_size
     when "balance"
-      current_close_price
+      @current_close_price
+    else
+      0.to_money
     end.exchange_to(account_currency).round
   end
 
   def retention_time
-    if closed?
-      ((close_date - open_date) / 60 / 60 / 24.0).round(2).days
-    end
+    (close_date - open_date).seconds.in_days.round(2).days if closed?
   end
 
   def margin
-    Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f) if prices_currency.to_sym != account_currency.to_sym
+    if prices_currency.to_sym != account_currency.to_sym
+      Money.add_rate(prices_currency, account_currency, 1 / open_price.to_f)
+    end
     (lot_size * base_lot_size * open_price / account.leverage.to_f).exchange_to(account_currency).round
   end
 
@@ -92,12 +100,19 @@ class Order < ApplicationRecord
 
   private
 
+  def current_close_price
+    closed? ? close_price : Money.new(specification.close_price_by_kind(kind) * 100, prices_currency)
+  end
+
   def specification
-    @specification ||= begin
-                         sp = Specification.find_by(symbol: symbol)
-                         sp.test = test if sp.present?
-                         sp
-                       end
+    @specification ||=
+      begin
+        sp = Specification.find_by(symbol:)
+        raise Specification::NoDataError, "There is no specification for :#{symbol} symbol." if !balance? && sp.blank?
+
+        sp.test = test if sp.present?
+        sp
+      end
   end
 
   def base_lot_size

@@ -2,6 +2,8 @@
 #
 # Performs calculation of trading signals, such as *Open Buy Order*, *Close Sell Order* etc.
 # It could use information of quotes series and indicators at given position of time.
+#
+# TODO: Try to implement strategy creation as Domain-Specific Language
 class Strategy
   include Loggable
 
@@ -18,11 +20,11 @@ class Strategy
     end
   end
 
-  def signal(*args)
+  def signal(*)
     logger.debug(prog_name) { "Performing calculations on current quote: #{series.current.inspect}" }
     # raise NotImplementedError, 'This method is from Strategy class. Implement it in subclass at wish.'
     calculations
-  rescue  Series::NoDataError
+  rescue Series::NoDataError
     :none
   end
 
@@ -37,7 +39,8 @@ class Strategy
   end
 
   def bands
-    @bands ||= series.iBands(period: bands_period, deviation: bands_deviation, ma_method: bands_ma_method, price: bands_price)
+    @bands ||= series.iBands(period: bands_period, deviation: bands_deviation, ma_method: bands_ma_method,
+                             price: bands_price)
   end
 
   def sar

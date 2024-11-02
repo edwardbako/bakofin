@@ -13,10 +13,13 @@
 #
 # Also could fetch list of orders. Order should be stored in format:
 #
-#   "ticket|type|magic|lots|symbol|open_time(rfc3339)|open_price|stop_loss|take_profit|close_time(rfc3339)|close_price|profit|swap|commission|expiration|comment"
+#   "ticket|type|magic|lots|symbol|open_time(rfc3339)|open_price|stop_loss|take_profit|close_time(rfc3339)|close_price|
+#   profit|swap|commission|expiration|comment"
 #
 class Account < ApplicationRecord
   include Redis::Objects
+  include Loggable
+
   hash_key :data
   hash_key :orders_data
 
@@ -29,7 +32,7 @@ class Account < ApplicationRecord
   end
 
   def load_orders_from_redis
-    orders_data.keys.each { |key| parse_order(orders_data[key]) }
+    orders_data.each_key { |price| parse_order(orders_data[price]) }
   end
 
   def load_data_and_orders_from_redis
@@ -54,7 +57,7 @@ class Account < ApplicationRecord
   end
 
   def level
-    equity.to_f / margin.to_f * 100
+    equity / margin.to_f * 100
   end
 
   def starting_balance
@@ -68,11 +71,13 @@ class Account < ApplicationRecord
 
   def history_by_date
     balance = 0
-    @history_wo ||= orders.closed.order(:close_date).map { |o| [ o.open_date, o.close_date, (balance += o.profit).to_s ] }
+    @history_by_date ||= orders.closed
+                               .order(:close_date)
+                               .map { |o| [ o.open_date, o.close_date, (balance += o.profit).to_s ] }
   end
 
   def net_profit
-    deals.sum(&:profit)
+    deals.sum(&:profit).to_money
   end
 
   def total_profit
@@ -96,7 +101,7 @@ class Account < ApplicationRecord
   end
 
   def profitable_deals
-    deals.select { |o| o.profit > 0 }
+    deals.select { |o| o.profit.positive? }
   end
 
   def profitable_deals_percentage
@@ -112,21 +117,21 @@ class Account < ApplicationRecord
   end
 
   def best_profitable_deal
-    profitable_deals.max { |a, b| a.profit <=> b.profit }
+    profitable_deals.max_by(&:profit)
   end
 
   def worst_loss_deal
-    loss_deals.min { |a, b,| a.profit <=> b.profit }
+    loss_deals.min_by(&:profit)
   end
 
   def profit_per_deal
     count = profitable_deals.count
-    count > 0 ? total_profit / count : 0.to_money
+    count.positive? ? (total_profit / count).round(2) : 0.to_money
   end
 
   def loss_per_deal
     count = loss_deals.count
-    count > 0 ? total_loss / count : 0.to_money
+    count.positive? ? (total_loss / count).round(2) : 0.to_money
   end
 
   def continuous
@@ -140,13 +145,13 @@ class Account < ApplicationRecord
         sum += profit
         count += 1
       else
-        result << OpenStruct.new(count: count, sum: sum)
+        result << OpenStruct.new(count:, sum:)
         count = 1
         sum = profit
       end
     end
 
-    result << OpenStruct.new(count: count, sum: sum)
+    result << OpenStruct.new(count:, sum:)
 
     result
   end
@@ -160,11 +165,11 @@ class Account < ApplicationRecord
   end
 
   def continuous_loss_by_count
-    continuous.select { |e| e.sum < 0 }.max_by(&:count)
+    continuous.select { |e| e.sum <= 0 }.max_by(&:count)
   end
 
   def continuous_loss_by_loss
-    continuous.select { |e| e.sum < 0 }.min_by(&:sum)
+    continuous.select { |e| e.sum <= 0 }.min_by(&:sum)
   end
 
   def mid_continuous_win_count
@@ -178,51 +183,31 @@ class Account < ApplicationRecord
   end
 
   def mid_retention_time
-    (deals.sum(&:retention_time) / deals.count).inspect
+    deals.blank? ? nil : (deals.sum(&:retention_time) / deals.count) % 1.year
   end
 
   def win_expectation
-    net_profit / deals.count
+    deals.blank? ? 0.to_money : (net_profit / deals.count).round(2)
   end
 
   def standard_deviation
-    mx = win_expectation
+    wx = win_expectation
     sum = 0
     deals.each do |o|
-      ot = (o.profit - mx).cents
-      sum += ot ** 2
+      ot = (o.profit - wx).cents
+      sum += ot**2
     end
     d = sum / (deals.count - 1)
-    (Math.sqrt(d) / 100).to_money
-  end
-
-  def hpr
-    ar = history
-    prev = ar.first.to_f
-
-    # Holding Period Returns
-    hpr = history[1..-1].map do |p|
-      res = (p.to_f / prev).round(2)
-      prev = p.to_f
-      res
-    end
-
-    # Average Holding Period Returns
-    ahpr = (hpr.sum / hpr.size) .round(5)
-
-    sum = 0
-    hpr.each do |p|
-      sum += (p - ahpr) ** 2
-    end
-    # Standard Deviation
-    sd = Math.sqrt(sum / hpr.size).round(5)
-
-    { hpr: hpr, ahpr: ahpr, sd: sd }
+    (Math.sqrt(d) / 100).round(2).to_money
   end
 
   def sharpe_ratio(risk_free_rate = 0)
     h = hpr
-    ((h[:ahpr] - (1 + risk_free_rate)) / h[:sd]).round(5)
+    if h.blank?
+      nil
+    else
+      ((h[:ahpr] - (1 + risk_free_rate)) / h[:sd]).round(5)
+    end
   end
 
   def profit_factor
@@ -231,16 +216,8 @@ class Account < ApplicationRecord
   end
 
   def recovery_factor
-    (net_profit / drawdowns.max_by(&:down).down).round(2)
-  end
-
-  def absolute_drawdown
-    min = history.map(&:to_money).min
-    if min < starting_balance
-      starting_balance - min
-    else
-      0.to_money
-    end
+    max_dd = drawdowns.max_by(&:down)
+    max_dd.zero? ? nil : (net_profit / max_dd.down).round(2)
   end
 
   def drawdowns
@@ -252,22 +229,31 @@ class Account < ApplicationRecord
     h.each do |balance|
       if balance >= ep
         down = ep - min
-        downs << OpenStruct.new(down: down.to_money, rel:  down/ep) if down > 0
+        downs << OpenStruct.new(down: down.to_money, rel: down / ep) if down > 0
         ep = balance
         min = ep
-      else
-        min = balance if balance < min
+      elsif balance < min
+        min = balance
       end
     end
 
     down = ep - min
-    downs << OpenStruct.new(down: down.to_money, rel:  down/ep) if down > 0
+    downs << OpenStruct.new(down: down.to_money, rel: down / ep) if down >= 0
 
     downs
   end
 
+  def absolute_drawdown
+    min = history.map(&:to_money).min
+    if min < starting_balance
+      starting_balance - min
+    else
+      0.to_money
+    end
+  end
+
   def max_drawdown
-    drawdowns.max_by(&:down).down
+    drawdowns.max_by(&:down).down.round(2)
   end
 
   def max_drawdown_percentage
@@ -275,7 +261,7 @@ class Account < ApplicationRecord
   end
 
   def relative_drawdown
-    drawdowns.max_by(&:rel).down
+    drawdowns.max_by(&:rel).down.round(2)
   end
 
   def relative_drawdown_percentage
@@ -284,42 +270,8 @@ class Account < ApplicationRecord
 
   def report
     ActiveRecord::Base.logger.silence do
-      puts "Report on Account: #{login}".bold
-      puts "-----------------"
-      # puts "Bars Processed \t\t\t" + "#{bars_processed}".bold
-      puts "Starting deposit \t\t" + "#{starting_balance.format(format)}".bold
-      puts "Deposit on close \t\t" + "#{balance.format(format)}".bold
-      puts "Profit factor \t\t\t" + "#{profit_factor}".bold
-      puts "Sharpe ratio \t\t\t" + "#{sharpe_ratio}".bold
-      puts "Recovery factor \t\t" + "#{recovery_factor}".bold
-      puts "-----------------"
-      puts "Net profit \t\t\t" + "#{net_profit.format(format)}".bold
-      puts "Total profit \t\t\t" + "#{total_profit.format(format)}".bold
-      puts "Total loss \t\t\t" + "#{total_loss.format(format)}".bold
-      puts "Win expectation \t\t"  + "#{win_expectation.format(format)}".bold
-      puts "Standard deviation \t\t" + "#{standard_deviation.format(format)}".bold
-      puts "Absolute drawdown \t\t" + "#{absolute_drawdown.format(format)}".bold
-      puts "Maximum drawdown \t\t" + "#{max_drawdown.format(format)} (#{max_drawdown_percentage}%)".bold
-      puts "Relative drawdown \t\t" + "#{relative_drawdown_percentage}% (#{relative_drawdown.format(format)})".bold
-      puts "-----------------"
-      puts "Total deals count \t\t" + "#{deals.count}".bold
-      puts "Buy deals count \t\t" + "#{buy_positions.count}".bold
-      puts "Sell deals count \t\t" + "#{sell_positions.count}".bold
-      puts "Profitable deals (% of all) \t" + "#{profitable_deals.count} (#{profitable_deals_percentage})".bold
-      puts "Loss deals (% of all) \t\t" + "#{loss_deals.count} (#{loss_deals_percentage})".bold
-      puts "Best profitable deal \t\t" + "#{best_profitable_deal.profit.format(format) if best_profitable_deal.present?}".bold
-      puts "Worst loss deal \t\t" + "#{worst_loss_deal.profit.format(format) if worst_loss_deal.present?}".bold
-      puts "Mid profit per deal \t\t" + "#{profit_per_deal.format(format)}".bold
-      puts "Mid loss per deal \t\t" + "#{loss_per_deal.format(format)}".bold
-      puts "Max continuous win by count \t" + "#{continuous_win_by_count.count} (#{continuous_win_by_count.sum.format(format)})".bold
-      puts "Max continuous loss by count \t" + "#{continuous_loss_by_count.count} (#{continuous_loss_by_count.sum.format(format)})".bold
-      puts "Max continuous win by profit \t" + "#{continuous_win_by_profit.sum.format(format)} (#{continuous_win_by_profit.count})".bold
-      puts "Max continuous loss by loss  \t" + "#{continuous_loss_by_loss.sum.format(format)} (#{continuous_loss_by_loss.count})".bold
-      puts "Mid continuous wins count \t" + "#{mid_continuous_win_count}".bold
-      puts "Mid continuous losses count \t" + "#{mid_continuous_loss_count}".bold
-      puts "-----------------"
-      puts "Mid retention time \t\t" + "#{mid_retention_time}".bold
-      # TODO: Implement report
+      ApplicationController.render self
+      # TODO: Implement charts
       # Also we need some charts:
       #   + * balance history
       #   * MFE
@@ -330,35 +282,37 @@ class Account < ApplicationRecord
 
   private
 
-  def format
-    { format: "%u %n", thousands_separator: " " }
+  def parse_data
+    data.each_key do |field|
+      send("#{field}=", data[field].tr("\\", "\s"))
+    end
   end
 
-  def parse_data
-    data.keys.each do |key|
-      self.send("#{key}=", data[key].gsub("\\", "\s"))
-    end
+  def test
+    login == "Test Account"
   end
 
   def parse_order(str)
     data = str.split("|")
 
-    o = orders.find_or_create_by(id: data[0], symbol: data[4])
+    o = orders.find_or_create_by(id: data[0], symbol: data[4], test:)
     currency = o.prices_currency
-    o.update(kind: data[1].to_i,
-             magic_number: data[2],
-             lot_size: data[3].to_f,
-             open_date: Time.rfc3339(data[5]),
-             open_price: prepare_money(data[6], currency),
-             stop_loss: prepare_money(data[7], currency),
-             take_profit: prepare_money(data[8], currency),
-             close_date: early_date(Time.rfc3339(data[9])),
-             close_price: data[1].to_i == 6 ? prepare_money(data[11], currency) : prepare_money(data[10], currency),
-             profit: prepare_money(data[11], self.currency),
-             swap: prepare_money(data[12], self.currency),
-             commission: prepare_money(data[13], self.currency),
-             expiration: data[14] != "0" ? Time.rfc3339(data[14]) : Time.new(0),
-             comment: data[15])
+    o.update(
+      kind: data[1].to_i,
+      magic_number: data[2],
+      lot_size: data[3].to_f,
+      open_date: Time.rfc3339(data[5]),
+      open_price: prepare_money(data[6], currency),
+      stop_loss: prepare_money(data[7], currency),
+      take_profit: prepare_money(data[8], currency),
+      close_date: early_date(Time.rfc3339(data[9])),
+      close_price: data[1].to_i == 6 ? prepare_money(data[11], currency) : prepare_money(data[10], currency),
+      profit: prepare_money(data[11], self.currency),
+      swap: prepare_money(data[12], self.currency),
+      commission: prepare_money(data[13], self.currency),
+      expiration: data[14] != 0.to_s ? Time.rfc3339(data[14]) : Time.new(0).in_time_zone,
+      comment: data[15]
+    )
   end
 
   def early_date(date)
@@ -367,5 +321,34 @@ class Account < ApplicationRecord
 
   def prepare_money(data, currency)
     Money.new(data.to_f * 100, currency)
+  end
+
+  def hpr
+    ar = history
+    if ar.size < 2
+      nil
+    else
+      prev = ar.first.to_f
+
+      # Holding Period Returns
+      hpr = history[1..-1].map do |p|
+        res = (p.to_f / prev).round(2)
+        prev = p.to_f
+        res
+      end
+
+      # Average Holding Period Returns
+      ahpr = (hpr.sum / hpr.size).round(5)
+
+      sum = 0
+      hpr.each do |p|
+        sum += (p - ahpr)**2
+      end
+
+      # Standard Deviation
+      sd = Math.sqrt(sum / hpr.size).round(5)
+
+      { hpr:, ahpr:, sd: }
+    end
   end
 end

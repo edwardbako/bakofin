@@ -15,13 +15,14 @@ class StrategyTester
   include Loggable
 
   attr_accessor :strategy_class, :symbol, :timeframe, :start_date, :stop_date
-  attr_reader :series, :strategy
 
+  # OPTIMIZE: Implement creation with Builder pattern
+  # TODO: Make Specification somewhat globally available
   def initialize(**args)
     args = defaults.merge args
     @symbol = args[:symbol]
     @timeframe = args[:timeframe]
-    @strategy_class = args[:strategy_class]
+    @strategy_class = "Strategy::#{args[:strategy]}".constantize
     @series = strategy.series
     @start_date = args[:start_date]
     @stop_date = args[:stop_date]
@@ -29,8 +30,12 @@ class StrategyTester
   end
 
   def defaults
-    { strategy_class: nil, symbol: nil, timeframe: nil,
-      start_date: Time.now - 10.years, stop_date: Time.now }
+    {
+      strategy: :Bands,
+      symbol: :XAUUSD,
+      timeframe: 60,
+      start_date: Time.now - 10.years,
+      stop_date: Time.now }
   end
 
   def run
@@ -48,32 +53,28 @@ class StrategyTester
     end
     pass.save
 
-    duration = (Time.now - start).round
-    minutes = duration / 1.minute
-    seconds = duration - minutes * 60.seconds
-    logger.info(prog_name) { "Test Pass #{pass.id} stopped. It took #{minutes}m #{seconds}s to run test." }
+    duration = (Time.now - start) % 1.day
+    logger.info(prog_name) { "Test Pass #{pass.id} stopped. It took #{duration.inspect} to run test." }
     logger.close
   end
 
-  def report
-    pass.report
-  end
+  delegate :report, to: :pass
 
   def series
-    @series ||= ::Series.new symbol: symbol, timeframe: timeframe, test: true, logger: logger
+    @series ||= ::Series.new symbol:, timeframe:, test: true, logger:
   end
 
   def strategy
-    @strategy ||= strategy_class.new(series: series, logger: logger)
+    @strategy ||= strategy_class.new(series:, logger:)
   end
 
   def pass
-    @pass ||= TestPass.create symbol: symbol,
-    logger: logger,
-    timeframe: timeframe,
-    start_date: start_date,
-    stop_date: stop_date,
-    strategy: strategy
+    @pass ||= TestPass.create symbol:,
+                              logger:,
+                              timeframe:,
+                              start_date:,
+                              stop_date:,
+                              strategy: strategy_class
   end
 
   def account
@@ -82,11 +83,12 @@ class StrategyTester
 
   def loader
     # TODO: Get rid of parameters?
-    @loader ||= QuotesLoader.new symbol: symbol, timeframe: timeframe, test: true, logger: logger
+    # TODO: Set :test attribute some kind globally. That is no need to pass it through.
+    @loader ||= QuotesLoader.new symbol:, timeframe:, test: true, logger:
   end
 
   def trader
-    @trader ||= Trader.new series: series, account: account, test: true, logger: logger
+    @trader ||= Trader.new series:, account:, test: true, logger:
   end
 
   private
@@ -98,7 +100,7 @@ class StrategyTester
     logger.debug(prog_name) { "Current account equity is #{account.equity}" }
     logger.debug(prog_name) { "Current account margin is #{account.margin}" }
 
-    pass.bars_processed = i
+    pass.update(bars_processed: i)
     trader.close_all_orders if i == size
   end
 end

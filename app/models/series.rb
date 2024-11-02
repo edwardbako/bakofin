@@ -6,7 +6,6 @@
 #   key: "series:#{symbol}:#{timeframe}"
 #
 
-
 class Series
   include ActiveModel::Model
   include Redis::Objects
@@ -18,8 +17,7 @@ class Series
   class NoDataError < Error; end
 
   def initialize(attributes = {})
-    super
-    @logger = attributes[:logger]
+    super attributes
     raise RecordInvalid, errors.full_messages.join(", ") unless valid?
   end
 
@@ -28,13 +26,12 @@ class Series
   validates_presence_of :symbol, :timeframe
 
   list :data
+  delegate :size, to: :data
+  delegate :precision, to: :specification
+  alias digits precision
 
   def id
     "#{symbol}:#{timeframe}#{test ? ':test' : ''}"
-  end
-
-  def size
-    data.size
   end
 
   def at(index)
@@ -53,26 +50,23 @@ class Series
     at 0
   end
 
-  alias_method :current, :last
+  alias current last
 
   def specification
-    specification = Specification.where(symbol: symbol).first
-    # raise NoDataError, "There is no specification for #{symbol} symbol."
+    specification = Specification[symbol]
     specification.test = test
     specification
-  end
-
-  def digits
-    specification.precision
   end
 
   def index_by(**params)
     unless params.key?(:time)
       raise NotImplementedError, "Object of class #{self.class} searches index only by time field."
     end
+
     i = 0
     all.each do |q|
-      break if q.time < params[:time] # TODO What if date not found?
+      break if q.time < params[:time] # TODO: What if date not found?
+
       i += 1
     end
     i
@@ -86,6 +80,11 @@ class Series
     Dir.entries("lib/indicator").sort[2..-1].map { |x| File.basename(x, ".rb").camelize }
   end
 
+  # Calculate indicators data
+  #
+  #   series = Series.new symbol: :XAUUSD, timeframe: 60
+  #   series.iMa    => Indicator::Ma
+  #
   _indicators_list.each do |m|
     define_method "i#{m}" do |**args|
       # noinspection RubyArgCount
@@ -96,16 +95,15 @@ class Series
   private
 
   def parse_quote(str)
-    if str.blank?
-      raise NoDataError, "There is no data available for #{symbol} symbol on #{timeframe} timeframe"
-    end
+    raise NoDataError, "There is no data available for #{symbol} symbol on #{timeframe} timeframe" if str.blank?
 
     data = str.split("|")
-    Quote.new time: Time.rfc3339(data[0]),
-              open: data[1].to_f,
-              high: data[2].to_f,
-              low: data[3].to_f,
-              close: data[4].to_f,
-              volume: data[5].to_i
+    Quote.new\
+      time: Time.rfc3339(data[0]),
+      open: data[1].to_f,
+      high: data[2].to_f,
+      low: data[3].to_f,
+      close: data[4].to_f,
+      volume: data[5].to_i
   end
 end

@@ -1,0 +1,10 @@
+|
+  Report on TestPass ##{test_pass.id.to_s.magenta}
+  on symbol: #{test_pass.symbol.to_s.green}, timeframe: #{test_pass.timeframe.to_s.green}
+  Strategy used:                  #{test_pass.strategy}
+  Bars processed                  #{test_pass.bars_processed.to_s.bold.magenta}
+  #{splitter}
+
+
+= "\n"
+= render test_pass.account

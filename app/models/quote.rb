@@ -1,3 +1,4 @@
+# == Quote
 class Quote
   include ActiveModel::Model
   include ActiveModel::Serializers::JSON
@@ -8,7 +9,7 @@ class Quote
     { time: nil, open: nil, high: nil, low: nil, close: nil, volume: nil }.stringify_keys
   end
 
-  alias_method :y, :volume
+  alias y volume
 
   def x
     time.to_i * 1000
@@ -31,11 +32,13 @@ class Quote
   end
 
   def to_s
-    "time=" + "#{time}".blue.bold +
-    ",\t open=" + "#{open}".magenta.bold +
-    ",\t high=" + "#{high}".magenta.bold +
-    ",\t low=" + "#{low}".magenta.bold +
-    ",\t close=" + "#{close}".magenta.bold +
-    ",\t volume=" + "#{volume}".yellow.bold
+    <<~STR
+      time = #{time.to_s.blue.bold}, \
+      open = #{open.to_s.magenta.bold}, \
+      high = #{high.to_s.magenta.bold}, \
+      low = #{low.to_s.magenta.bold}, \
+      close = #{close.to_s.magenta.bold}, \
+      volume = #{volume.to_s.yellow.bold}
+    STR
   end
 end

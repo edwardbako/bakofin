@@ -2,27 +2,33 @@ module Loggable
   extend ActiveSupport::Concern
 
   attr_accessor :logger
-  attr_reader :filename
+  attr_reader :log_filename
 
+  def initialize(attributes = {})
+    super
+    @logger = attributes[:logger] if attributes.present? and attributes[:logger].present?
+  end
+
+  # TODO: Make logger globaly defined. That is no need to pass it through.
   def logger
     @logger ||= begin
-                  logger = Logger.new(log_filename)
-                  logger.formatter = ->(severity, time, progname, message) do
-                    "#{severity} -- #{progname}: #{message}\n"
-                  end
-                  logger
+                  logger = Logger.new(full_filename)
+                  # logger.formatter = ->(severity, time, progname, message) do
+                  #   "#{severity} -- #{progname}: #{message}\n"
+                  # end
+                  # logger
                 end
   end
 
   def log
-    File.read(log_filename)
+    File.read(full_filename)
   end
 
   private
 
-  def log_filename
-    @filename ||= "#{Time.now.xmlschema}_#{prog_name}##{object_id}.log"
-    File.join(logs_path, filename)
+  def full_filename
+    @log_filename ||= "#{Time.now.xmlschema}_#{prog_name}##{object_id}.log"
+    File.join(logs_path, log_filename)
   end
 
   def prog_name
@@ -41,7 +47,9 @@ module Loggable
     private
 
     def logs_path
-      Rails.root.join "log/#{prog_name}"
+      path = Rails.root.join "log/#{prog_name}"
+      FileUtils.mkdir_p(path) unless File.exist?(path)
+      path
     end
 
     def prog_name

@@ -85,12 +85,31 @@ class Specification < ApplicationRecord
     end
   end
 
+  class << self
+    def [](symbol)
+      specifications = find_by(symbol: symbol)
+      raise NoDataError, "There is no specification for :#{symbol} symbol." if specifications.blank?
+      specifications
+    end
+  end
+
+
   private
 
-  def get(key)
-    response = $redis.get("#{symbol}:#{key}#{test ? ":test" : ''}")
+  def get(price)
+    response = $redis.get(redis_key_for(price))
     raise NoDataError, "There is no market data for :#{symbol} symbol." if response.blank?
     response
+  end
+
+  def redis_key_for(price)
+    [
+      symbol,
+      price,
+      ("test" if test)
+    ]
+     .compact
+     .join(":")
   end
 
   def rate_for_base
@@ -102,14 +121,7 @@ class Specification < ApplicationRecord
   end
 
   def specification_for_base(base)
-    sym = "USD#{base}"
-    specification = Specification.find_by(symbol: sym)
-
-    if specification.present?
-      specification
-    else
-      raise NoDataError, "There is no specification for :#{sym} symbol."
-    end
+    self.class["USD#{base}"]
   end
 
   def lot_size_step_digits

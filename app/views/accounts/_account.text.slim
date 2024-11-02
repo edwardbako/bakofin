@@ -1,0 +1,35 @@
+| 
+  Report on Account:              #{account.login.to_s.bold.green}
+  #{splitter}
+  Starting deposit              #{account.starting_balance.format(format).to_s.bold}
+  Deposit on close              #{account.balance.format(format).to_s.bold}
+  Profit factor                   #{account.profit_factor.to_s.bold}
+  Sharpe ratio                    #{account.sharpe_ratio.to_s.bold}
+  Recovery factor                 #{account.recovery_factor.to_s.bold}
+  #{splitter}
+  Net profit                    #{account.net_profit.format(format).to_s.bold}
+  Total profit                  #{account.total_profit.format(format).to_s.bold}
+  Total loss                    #{account.total_loss.format(format).to_s.bold}
+  Win expectation               #{account.win_expectation.format(format).to_s.bold}
+  Standard deviation            #{account.standard_deviation.format(format).to_s.bold}
+  Absolute drawdown             #{account.absolute_drawdown.format(format).to_s.bold}
+  Maximum drawdown              #{account.max_drawdown.format(format).bold}     #{"( #{account.max_drawdown_percentage}% )".yellow}
+  Relative drawdown               #{account.relative_drawdown_percentage.to_s.bold}%       #{"( #{account.relative_drawdown.format(format)} )".yellow}
+  #{splitter}
+  Total deals count               #{account.deals.count.to_s.bold}
+  Buy deals count                 #{account.buy_positions.count.to_s.bold}
+  Sell deals count                #{account.sell_positions.count.to_s.bold}
+  Profitable deals (% of all)     #{account.profitable_deals.count.to_s.bold}             #{"( #{account.profitable_deals_percentage} )".yellow}
+  Loss deals (% of all)           #{account.loss_deals.count.to_s.bold}             #{"( #{account.loss_deals_percentage} )".yellow}
+  Best profitable deal          #{account&.best_profitable_deal&.profit&.format(format).to_s.bold}
+  Worst loss deal               #{account&.worst_loss_deal&.profit&.format(format).to_s.bold}
+  Mid profit per deal           #{account.profit_per_deal.format(format).to_s.bold}
+  Mid loss per deal             #{account.loss_per_deal.format(format).to_s.bold}
+  Max continuous win by count     #{account.continuous_win_by_count.count.to_s.bold}             #{"( #{account.continuous_win_by_count.sum.format(format)} )".yellow}
+  Max continuous loss by count    #{account.continuous_loss_by_count.count.to_s.bold}             #{"( #{account.continuous_loss_by_count.sum.format(format)} )".yellow}
+  Max continuous win by profit  #{account.continuous_win_by_profit.sum.format(format).bold}     #{"( #{account.continuous_win_by_profit.count} )".yellow}
+  Max continuous loss by loss   #{account.continuous_loss_by_loss.sum.format(format).bold}    #{"( #{account.continuous_loss_by_loss.count} )".yellow}
+  Mid continuous wins count       #{account.mid_continuous_win_count.to_s.bold}
+  Mid continuous losses count     #{account.mid_continuous_loss_count.to_s.bold}
+  #{splitter}
+  Mid retention time            #{account.mid_retention_time.inspect.to_s.bold.light_blue}

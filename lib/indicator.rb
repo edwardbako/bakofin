@@ -37,7 +37,7 @@ class Indicator
 
   class BlankIndexError < Error
     def message
-      super + "Dob't know how to calculate indicator on blank index. "
+      super + "Don't know how to calculate indicator on blank index. "
     end
   end
 
@@ -46,8 +46,8 @@ class Indicator
 
   def initialize(**args)
     args.reverse_merge! defaults
-    args.each do |key, value|
-      instance_variable_set "@#{key}", value
+    args.each do |price, value|
+      instance_variable_set "@#{price}", value
     end
     raise Indicator::BlankSeriesError if series.blank?
     post_initialize(**args)
@@ -67,6 +67,8 @@ class Indicator
   def current
     self[0]
   end
+
+  alias last current
 
   private
 

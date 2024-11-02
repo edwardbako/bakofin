@@ -62,23 +62,29 @@ gem "bootsnap", require: false
 
 gem "exception_notification"
 
-gem "pry-byebug" # Call 'binding.pry' anywhere in the code to stop execution and get a debugger console
-gem "pry-rails"
-gem "pry-doc"
-gem "pry-stack_explorer"
+# gem "pry-byebug" # Call 'binding.pry' anywhere in the code to stop execution and get a debugger console
+# gem "pry-rails"
+# gem "pry-doc"
+# gem "pry-stack_explorer"
 gem "colorize" # Colorize strings output
 gem "highline"
+gem "hirb"
 gem "table_print"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "debug", platforms: %i[mri windows], require: "debug/prelude"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  # gem 'rubocop-rails', require: false
+  # TODO: Compose rules best of two worlds
+
+  gem "factory_bot_rails"
+  gem "faker"
 end
 
 group :development do
@@ -107,7 +113,6 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
-  gem "factory_bot_rails"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

@@ -17,7 +17,7 @@ class QuotesLoader
              XAUUSD240.csv XAUUSD1440.csv]
   TIMEZONE = "+03:00"
 
-  attr_accessor :path, :filename, :symbol, :timeframe, :test
+  attr_accessor :path, :symbol, :timeframe, :test
 
   def initialize(path: PATH, symbol: nil, timeframe: nil, test: false, logger: nil)
     @path = path
@@ -79,9 +79,26 @@ class QuotesLoader
   end
 
   def self.process_all
-    FILES.each do |fname|
-      loader = new(path: PATH, filename: fname)
-      loader.load_to_redis
+    all do |loader, timeframe|
+      [ timeframe, loader.load_to_redis ]
+    end.to_h
+  end
+
+  def self.all_sizes
+    all do |loader, timeframe|
+      [ timeframe, loader.size ]
+    end.to_h
+  end
+
+  def self.all
+    FILES.map do |fname|
+      fname =~ /(\p{L}+)(\d+).(\w*)/
+      loader = new(path: PATH, symbol: $1, timeframe: $2)
+      if block_given?
+        yield loader, $2
+      else
+        loader
+      end
     end
   end
 
@@ -97,12 +114,12 @@ class QuotesLoader
 
   # def filename_parsed
   #   filename =~ /(\p{L}+)(\d+).(\w*)/
-  #
+
   #   unless SUPPORTED_EXTENSIONS.include? $3
-  #     raise StandardError, "You have provided file with extension (#{$3}) that is not supported. Supported extensions: #{SUPPORTED_EXTENSIONS}"
+  # raise StandardError, "You have provided file with extension (#{$3}) that is not supported. Supported extensions: #{SUPPORTED_EXTENSIONS}"
   #   end
-  #
-  #   [$1, $2, $3]
+
+  #   [ $1, $2, $3 ]
   # end
 
   def test_key_ext
