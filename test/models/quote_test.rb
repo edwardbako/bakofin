@@ -6,11 +6,15 @@ class QuoteTest < ActiveSupport::TestCase
     @quote = FactoryBot.build(:quote)
   end
 
+  teardown do
+    $redis.flushdb
+  end
+
   test "list of attributes" do
     assert_kind_of Hash, @quote.attributes
   end
 
-  test "calculate x value" do
+  test "calculate x value /aka time seconds integer" do
     assert_equal 1_728_057_600_000, @quote.x
   end
 

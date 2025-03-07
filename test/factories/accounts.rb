@@ -27,5 +27,11 @@ FactoryBot.define do
         # account.reload
       end
     end
+
+    factory :account_with_balance do
+      after(:create) do |account|
+        create_list(:balance_order, 1, account:)
+      end
+    end
   end
 end

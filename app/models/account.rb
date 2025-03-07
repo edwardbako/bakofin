@@ -52,6 +52,11 @@ class Account < ApplicationRecord
     orders.opened.sum(&:margin)
   end
 
+  def load
+    margin / equity.to_f
+  end
+
+
   def free_margin
     equity - margin
   end
@@ -61,7 +66,7 @@ class Account < ApplicationRecord
   end
 
   def starting_balance
-    orders.closed.order(:close_date).first.profit
+    orders.closed.order(:close_date)&.first&.profit
   end
 
   def history
@@ -270,7 +275,7 @@ class Account < ApplicationRecord
 
   def report
     ActiveRecord::Base.logger.silence do
-      ApplicationController.render self
+      ApplicationController.render self, formats: [ :text ]
       # TODO: Implement charts
       # Also we need some charts:
       #   + * balance history

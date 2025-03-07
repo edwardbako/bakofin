@@ -8,6 +8,10 @@ class SeriesTest < ActiveSupport::TestCase
     $redis.lpush key, "2024-11-02T19:00:00+07:00|4|7|1|3|2000"
   end
 
+  teardown do
+    $redis.flushdb
+  end
+
   test "NoDataError raised when there is no data about quotes" do
     $redis.del key
     assert_raises Series::NoDataError do
@@ -31,7 +35,12 @@ class SeriesTest < ActiveSupport::TestCase
 
   test "size calculation based on data" do
     assert_respond_to @series, :size
-    assert @series.size > 0
+    assert_equal 2, @series.size
+  end
+
+  test "get quote on given position" do
+    assert_respond_to @series, :at
+    assert_equal 6, @series[1].open
   end
 
   test "get current quote" do
@@ -51,6 +60,7 @@ class SeriesTest < ActiveSupport::TestCase
   test "get all quotes data" do
     assert_respond_to @series, :all
     assert_kind_of Array, @series.all
+    assert_equal 2, @series.all.size
   end
 
   test "all elements of data are parsed as quotes" do

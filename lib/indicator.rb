@@ -7,7 +7,7 @@
 #
 # = Accessing Elements
 #
-# Elements in an indicator can be retrieved using the Indicator#[] method.  It can
+# Elements of an indicator can be retrieved using the Indicator#[] method.  It can
 # take a single integer argument (a numeric index) or a range.
 # Negative indices are not supported.
 #
@@ -41,7 +41,7 @@ class Indicator
     end
   end
 
-  attr_reader :series, :size, :period, :shift
+  attr_reader :series, :period, :shift
   attr_accessor :range
 
   def initialize(**args)

@@ -1,11 +1,15 @@
 require "test_helper"
 
 class TestPassTest < ActiveSupport::TestCase
-  def setup
+  setup do
     @test_pass = FactoryBot.create(:test_pass)
   end
 
-  test '"creates new account' do
+  teardown do
+    $redis.flushdb
+  end
+
+  test "creates new account" do
     assert @test_pass.account.present?
   end
 

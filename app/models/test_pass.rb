@@ -20,7 +20,7 @@ class TestPass < ApplicationRecord
 
   def report
     ActiveRecord::Base.logger.silence do
-      ApplicationController.render self
+      ApplicationController.render self, formats: [ :text ]
     end
   end
 

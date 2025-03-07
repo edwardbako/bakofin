@@ -1,7 +1,7 @@
 require "test_helper"
 
 class SpecificationTest < ActiveSupport::TestCase
-  def setup
+  setup do
     @specification = FactoryBot.create(:test_specification)
     @market_prices = {
       ask: 20.0,
@@ -10,6 +10,10 @@ class SpecificationTest < ActiveSupport::TestCase
     }
     $redis.set "#{@specification.symbol}:ask:test", @market_prices[:ask]
     $redis.set "#{@specification.symbol}:bid:test", @market_prices[:bid]
+  end
+
+  teardown do
+    $redis.flushdb
   end
 
   test "point calculation" do
@@ -66,6 +70,18 @@ class SpecificationTest < ActiveSupport::TestCase
     @specification = FactoryBot.create(:specification_with_fake_symbol)
     assert_raises Specification::NoDataError do
       @specification.ask
+    end
+  end
+
+  test "Finds needed specification" do
+    specification = Specification[:XAUUSD]
+    assert_instance_of Specification, specification
+    assert_equal "XAUUSD", specification.symbol
+  end
+
+  test "raises NoDataError when there is no specification" do
+    assert_raises Specification::NoDataError do
+      Specification[:FAKESY]
     end
   end
 end

@@ -20,7 +20,7 @@ class AccountTest < ActiveSupport::TestCase
   end
 
   teardown do
-    redis.del(@account.data.key)
+    $redis.flushdb
   end
 
   # Test load_from_redis
@@ -46,6 +46,7 @@ class AccountTest < ActiveSupport::TestCase
   test "should load data and orders from Redis" do
     mock = Minitest::Mock.new
     2.times { mock.expect :call, nil }
+
 
     @account.stub :load_from_redis, mock do
       @account.stub :load_orders_from_redis, mock do

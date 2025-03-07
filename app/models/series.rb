@@ -42,9 +42,7 @@ class Series
     end
   end
 
-  def [](index)
-    at index
-  end
+  alias [] at
 
   def last
     at 0

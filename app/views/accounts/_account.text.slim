@@ -1,7 +1,7 @@
 | 
   Report on Account:              #{account.login.to_s.bold.green}
   #{splitter}
-  Starting deposit              #{account.starting_balance.format(format).to_s.bold}
+  Starting deposit              #{account.starting_balance&.format(format).to_s.bold}
   Deposit on close              #{account.balance.format(format).to_s.bold}
   Profit factor                   #{account.profit_factor.to_s.bold}
   Sharpe ratio                    #{account.sharpe_ratio.to_s.bold}

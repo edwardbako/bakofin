@@ -9,6 +9,10 @@ class OrderTest < ActiveSupport::TestCase
     redis.set "XAUUSD:bid:test", 10
   end
 
+  teardown do
+    $redis.flushdb
+  end
+
   test "should check opened" do
     order = FactoryBot.create(:opened_buy_order)
     assert order.opened?

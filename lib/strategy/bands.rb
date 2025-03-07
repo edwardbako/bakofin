@@ -5,9 +5,13 @@ class Strategy::Bands < Strategy
 
   def calculations
     case
-    when (bands[1].percent_b < 100 - enter_limit) && (bands[0].percent_b >= 100 - enter_limit) && (ma100.current.main > ma150.current.main)
+    when (bands[1].percent_b < 100 - enter_limit) &&
+         (bands[0].percent_b >= 100 - enter_limit) &&
+         (ma100.current.main > ma150.current.main)
       :open_buy
-    when (bands[1].percent_b > enter_limit) && (bands[0].percent_b >= enter_limit) && (ma100.current.main < ma150.current.main)
+    when (bands[1].percent_b > enter_limit) &&
+         (bands[0].percent_b >= enter_limit) &&
+         (ma100.current.main < ma150.current.main)
       :open_sell
     when series.current.low < sar.current.main
       :close_buy

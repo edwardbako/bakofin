@@ -6,7 +6,7 @@ class Quote
   attr_accessor :time, :open, :high, :low, :close, :volume
 
   def attributes
-    { time: nil, open: nil, high: nil, low: nil, close: nil, volume: nil }.stringify_keys
+    { time:, open:, high:, low:, close:, volume: }.stringify_keys
   end
 
   alias y volume

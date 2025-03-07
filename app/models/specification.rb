@@ -87,9 +87,9 @@ class Specification < ApplicationRecord
 
   class << self
     def [](symbol)
-      specifications = find_by(symbol: symbol)
-      raise NoDataError, "There is no specification for :#{symbol} symbol." if specifications.blank?
-      specifications
+      specification = find_by(symbol: symbol)
+      raise NoDataError, "There is no specification for :#{symbol} symbol." if specification.blank?
+      specification
     end
   end
 

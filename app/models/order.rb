@@ -53,6 +53,7 @@ class Order < ApplicationRecord
   def close(price: current_close_price, date: Time.current)
     self.close_price = price
     self.close_date = date
+    self.profit = profit
     logger.debug(prog_name) { "Closing order ##{id}-#{kind}. Profit: #{profit}." }
     save
   end
@@ -106,10 +107,8 @@ class Order < ApplicationRecord
 
   def specification
     @specification ||=
-      begin
-        sp = Specification.find_by(symbol:)
-        raise Specification::NoDataError, "There is no specification for :#{symbol} symbol." if !balance? && sp.blank?
-
+      unless balance?
+        sp = Specification[symbol]
         sp.test = test if sp.present?
         sp
       end

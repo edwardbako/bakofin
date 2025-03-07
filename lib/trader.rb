@@ -5,14 +5,30 @@
 class Trader
   include Loggable
 
-  attr_accessor :series, :account, :magic_number, :max_load_percent, :risk_per_trade_percent, :max_opened_orders, :test
+  attr_accessor :series, :account, :magic_number,
+                :max_load_percent, :risk_per_trade_percent, :max_opened_orders,
+                :decrease_factor, :test
 
   def initialize(**args)
     args.reverse_merge! defaults
     args.each do |key, value|
-      instance_variable_set "@#{key}", value
+      send "#{key}=", value
+      # instance_variable_set "@#{key}", value
     end
   end
+
+  def trade(signal: :none)
+    send signal
+  end
+
+  def close_all_orders
+    logger.debug(prog_name) { "Closing all orders." }
+
+    close_buy
+    close_sell
+  end
+
+  private
 
   def defaults
     {
@@ -22,25 +38,14 @@ class Trader
       max_load_percent: 0.1,
       risk_per_trade_percent: 0.02,
       decrease_factor: 5.0,
-      max_opened_orders: 2
+      max_opened_orders: 1
     }
   end
-
-  def trade(signal: :none)
-    send signal
-  end
-
-  def close_all_orders
-    logger.debug(prog_name) { "Closing all orders." }
-    close_buy
-    close_sell
-  end
-
-  private
 
   def open_buy
     logger.debug(prog_name) { "OPEN BUY signal received." }
     logger.debug(prog_name) { "Trying to close short orders." }
+
     close_sell
     open_order kind: :buy
   end
@@ -48,29 +53,36 @@ class Trader
   def open_sell
     logger.debug(prog_name) { "OPEN SELL signall received." }
     logger.debug(prog_name) { "Trying to close long orders." }
+
     close_buy
     open_order kind: :sell
   end
 
   def close_buy
     logger.debug(prog_name) { "CLOSE BUY signal received." }
+
     close_orders kind: :buy
   end
 
   def close_sell
     logger.debug(prog_name) { "CLOSE SELL signal received." }
+
     close_orders kind: :sell
   end
 
   def none
     logger.debug(prog_name) { "Nothing to do." }
+
     nil
   end
 
   def open_order(kind: nil)
     lot = lot_size(kind)
-    if lot > 0 and orders.opened.count < max_opened_orders
+
+    if lot > 0 and orders.count < max_opened_orders
       logger.debug(prog_name) { "Trying to open new order..." }
+      # binding.irb
+
       order = orders.create symbol: series.symbol,
                     kind: kind,
                     lot_size: lot,
@@ -83,21 +95,22 @@ class Trader
                     swap: 0,
                     commission: 0,
                     magic_number: magic_number,
-                    logger: logger,
-                    test: test
+                    logger: logger
+
       logger.debug(prog_name) { "New order created: #{order.attributes}" }
     end
   end
 
   def close_orders(kind: nil)
-    orders.send(kind).opened.each do |o|
+    orders.send(kind).each do |o|
       o.close date: series.current.time
+
       logger.debug(prog_name) { "Order has been closed. #{o.inspect}" }
     end
   end
 
   def orders
-    account.orders.where(magic_number: magic_number)
+    account.orders.where(magic_number: magic_number).opened
   end
 
   def lot_by_margin(kind)
@@ -110,8 +123,10 @@ class Trader
 
   def lot_size(kind)
     lbm, lbr = lot_by_margin(kind), lot_by_risk
+
     logger.debug(prog_name) { "Lot by margin is #{lbm}" }
     logger.debug(prog_name) { "Lot by risk is #{lbr}" }
+
     [ lbm, lbr ].min
   end
 
@@ -120,19 +135,11 @@ class Trader
   end
 
   def free_margin
-    max_load - margin
+    max_load - account.margin
   end
 
   def risk_per_trade
     account.equity * risk_per_trade_percent
-  end
-
-  def margin
-    orders.opened.sum(&:margin)
-  end
-
-  def load
-    margin / account.equity.to_f
   end
 
   def specification
